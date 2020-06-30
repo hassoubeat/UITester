@@ -16,29 +16,25 @@ Parameters:
     Default: local
 
 Resources:
-  # テストLambda「HelloWorldFunction」の定義
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+  ProjectsQueingFunction:
+    Type: AWS::Serverless::Function
     Properties:
-      CodeUri: hello_world/
-      Handler: app.lambda_handler
+      CodeUri: lambda/projects/
+      Handler: queing.lambda_handler
       Runtime: python3.8
       Events:
-        HelloWorld:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+        RestPost:
+          Type: Api
           Properties:
-            RestApiId: !Ref HelloWorldApi
-            Path: /hello
-            Method: get
-  HelloWorldApi:
+            RestApiId: !Ref UITesterApi
+            Path: /projects/queing
+            Method: post
+  UITesterApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: !Ref Env
 
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldApi:
+  ProjectsQueingApi:
     Description: "Access Command"
-    Value: !Sub "curl https://${HelloWorldApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/hello/"
+    Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/queing/"
