@@ -22,6 +22,9 @@ Resources:
       CodeUri: lambda/projects/
       Handler: queing.lambda_handler
       Runtime: python3.8
+      Environment:
+        Variables:
+          SCREENSHOT_PROCESS_SQS: !Ref ScreenshotProcessSQS
       Events:
         RestPost:
           Type: Api
@@ -33,8 +36,18 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: !Ref Env
+  ScreenshotProcessSQS:
+    Type: AWS::SQS::Queue
+    Properties:
+      # 可視性タイムアウト
+      VisibilityTimeout: 60
+      # メッセージをキューに貯めておく期間
+      MessageRetentionPeriod: 86400
 
 Outputs:
   ProjectsQueingApi:
     Description: "Access Command"
     Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/queing/"
+  ScreenshotProcessSQS:
+    Description: "ScreenshotProcessSQS PATH"
+    Value: !Sub "${ScreenshotProcessSQS}"
