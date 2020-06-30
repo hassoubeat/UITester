@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 15
+
+Parameters:
+  Env: # prod: 本番環境、stg: 検品環境、 local: ローカル開発環境
+    Type: String
+    AllowedValues:
+      - prod
+      - stg
+      - local
+    Default: local
+
+Resources:
+  # テストLambda「HelloWorldFunction」の定義
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello_world/
+      Handler: app.lambda_handler
+      Runtime: python3.8
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref HelloWorldApi
+            Path: /hello
+            Method: get
+  HelloWorldApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Env
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  HelloWorldApi:
+    Description: "Access Command"
+    Value: !Sub "curl https://${HelloWorldApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/hello/"
