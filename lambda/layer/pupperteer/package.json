@@ -1,0 +1,13 @@
+{
+    "name": "replaced-by-user-input",
+    "description": "replaced-by-user-input",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "chrome-aws-lambda": "^3.1.1",
+        "puppeteer-core": "^4.0.1"
+    },
+    "scripts": {
+        "test": "jest"
+    }
+}

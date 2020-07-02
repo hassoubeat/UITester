@@ -42,13 +42,30 @@ Resources:
       CodeUri: lambda/projects/
       Handler: pulling.lambda_handler
       Runtime: nodejs12.x
-      Timeout: 60 # SQSの可視性タイムアウトと揃える
+      Layers:
+        - !Ref PupperteerLayer
+      Timeout: 30 # SQSの可視性タイムアウトと揃える
+      MemorySize: 1600 # Pupperteerを動かす以上最低必要なメモリ
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref UITesterS3
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !Ref UITesterS3
       Events:
         SQSQueueEvent:
           Type: SQS
           Properties:
             Queue: !GetAtt ScreenshotProcessSQS.Arn
             BatchSize: 1
+  PupperteerLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: 'lambda/layer/pupperteer'
+      CompatibleRuntimes:
+        - nodejs12.x
+    Metadata:
+      BuildMethod: nodejs12.x
             
   UITesterApi:
     Type: AWS::Serverless::Api
@@ -59,7 +76,7 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       # 可視性タイムアウト
-      VisibilityTimeout: 60
+      VisibilityTimeout: 30
       # メッセージをキューに貯めておく期間
       MessageRetentionPeriod: 86400
       # DLQの設定
@@ -70,9 +87,14 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       # 可視性タイムアウト
-      VisibilityTimeout: 60
+      VisibilityTimeout: 30
       # メッセージをキューに貯めておく期間
       MessageRetentionPeriod: 86400
+
+  UITesterS3:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "${Env}-uitester"
 
 Outputs:
   ProjectsQueingApi:
