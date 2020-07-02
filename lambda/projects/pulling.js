@@ -48,7 +48,7 @@ exports.lambda_handler = async (event, context) => {
         }
         case WAIT: {
           console.log('switch ' + WAIT);
-          await page.waitFor(process.milisecond);
+          await page.waitFor(process.millisecond);
           break;
         }
         case FOCUS: {
@@ -81,7 +81,8 @@ exports.lambda_handler = async (event, context) => {
     params = {
       Bucket: SAVE_BUCKET_NAME,
       Key: `result/${action.actionId}.png`,
-      Body: screenshot
+      Body: screenshot,
+      ContentType: 'image/png'
     }
     result = await S3.putObject(params).promise();
 

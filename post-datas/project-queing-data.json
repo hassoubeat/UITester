@@ -13,7 +13,7 @@
           },
           {
             "processType":"WAIT",
-            "millsecond": 1000
+            "millisecond": 1000
           }
         ]
       },
@@ -27,7 +27,7 @@
           },
           {
             "processType":"WAIT",
-            "millsecond": 3000
+            "millisecond": 3000
           }
         ]
       }

@@ -95,6 +95,18 @@ Resources:
     Type: "AWS::S3::Bucket"
     Properties:
       BucketName: !Sub "${Env}-uitester"
+      AccessControl: PublicRead
+  UITesterS3Policy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref UITesterS3
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: "Allow"
+            Principal: "*"
+            Resource: !Sub arn:aws:s3:::${UITesterS3}/*
 
 Outputs:
   ProjectsQueingApi:
