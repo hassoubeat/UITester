@@ -23,6 +23,10 @@ Resources:
       Handler: queing.lambda_handler
       Runtime: nodejs12.x
       Timeout: 60 # SQSの可視性タイムアウトと揃える
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName:
+              !GetAtt ScreenshotProcessSQS.QueueName
       Environment:
         Variables:
           SCREENSHOT_PROCESS_SQS: !Ref ScreenshotProcessSQS
