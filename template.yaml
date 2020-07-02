@@ -22,7 +22,6 @@ Resources:
       CodeUri: lambda/projects/
       Handler: queing.lambda_handler
       Runtime: nodejs12.x
-      Timeout: 60 # SQSの可視性タイムアウトと揃える
       Policies:
         - SQSSendMessagePolicy:
             QueueName:
@@ -37,11 +36,37 @@ Resources:
             RestApiId: !Ref UITesterApi
             Path: /projects/queing
             Method: post
+  ScreenshotProcessFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/projects/
+      Handler: pulling.lambda_handler
+      Runtime: nodejs12.x
+      Timeout: 60 # SQSの可視性タイムアウトと揃える
+      Events:
+        SQSQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ScreenshotProcessSQS.Arn
+            BatchSize: 1
+            
   UITesterApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: !Ref Env
+
   ScreenshotProcessSQS:
+    Type: AWS::SQS::Queue
+    Properties:
+      # 可視性タイムアウト
+      VisibilityTimeout: 60
+      # メッセージをキューに貯めておく期間
+      MessageRetentionPeriod: 86400
+      # DLQの設定
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt ScreenshotProcessDLQ.Arn
+        maxReceiveCount: 1
+  ScreenshotProcessDLQ:
     Type: AWS::SQS::Queue
     Properties:
       # 可視性タイムアウト
