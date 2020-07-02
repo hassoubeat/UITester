@@ -3,22 +3,33 @@ const SQS = new AWS.SQS({apiVersion: '2012-11-05'});
 const SQS_QUEUE_URL = process.env.SCREENSHOT_PROCESS_SQS;
 
 exports.lambda_handler = async (event, context) => {
-  inputData = JSON.parse(event['body']);
-  console.log(inputData.test);
+  console.log(event);
+  const payload = JSON.parse(event.body);
+  console.log(payload);
 
-  let params = {
-    MessageBody: inputData.test,
-    QueueUrl: SQS_QUEUE_URL,
-  };
+  var result = {};
 
-  result = await SQS.sendMessage(params).promise();
+  // Actionの内容をSQSに登録
+  for(const action of payload.project.actions) {
+    console.log(action);
+    let params = {
+      MessageBody: JSON.stringify(action),
+      QueueUrl: SQS_QUEUE_URL,
+    };
+    try {
+      result[action.actionId] = await SQS.sendMessage(params).promise();
+    } catch (error) {
+      result[action.actionId] = error;
+    }
+  }
+
   console.log(result);
 
   try {
     response = {
       'statusCode': 200,
       'body': JSON.stringify({
-        message: 'hello world',
+        message: result,
       })
     }
   } catch (err) {

@@ -1,0 +1,36 @@
+{
+  "project": {
+    "projectNameId": "Project-1",
+    "projectName": "プロジェクト1",
+    "actions": [
+      {
+        "actionId":"Action-1",
+        "actionName":"アクション1",
+        "actionProcesies": [
+          {
+            "processType":"GOTO",
+            "url": "https://www.google.com"
+          },
+          {
+            "processType":"WAIT",
+            "millsecond": 1000
+          }
+        ]
+      },
+      {
+        "actionId":"Action-2",
+        "actionName":"アクション2",
+        "actionProcesies": [
+          {
+            "processType":"GOTO",
+            "url": "https://www.yahoo.co.jp"
+          },
+          {
+            "processType":"WAIT",
+            "millsecond": 3000
+          }
+        ]
+      }
+    ]
+  }
+}
