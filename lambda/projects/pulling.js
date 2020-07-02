@@ -1,3 +1,6 @@
+/* 日本語フォントが入っている.fontsを読み込ませるためにHOMEを設定する */
+process.env['HOME'] = '/opt/nodejs/';
+
 const AWS = require('aws-sdk');
 const chromium = require('chrome-aws-lambda');
 const puppeteer = chromium.puppeteer;
