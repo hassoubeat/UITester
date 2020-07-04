@@ -58,10 +58,61 @@ Resources:
           Properties:
             Queue: !GetAtt ScreenshotProcessSQS.Arn
             BatchSize: 1
+  ImageDiffProcessQueingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/projects/
+      Handler: imagediff-queing.lambda_handler
+      Runtime: nodejs12.x
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName:
+              !GetAtt ImageDiffProcessSQS.QueueName
+      Environment:
+        Variables:
+          SCREENSHOT_PROCESS_SQS: !Ref ImageDiffProcessSQS
+      Events:
+        RestPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UITesterApi
+            Path: /projects/imagediff-queing
+            Method: post
+  ImageDiffProcessFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/projects/
+      Handler: imagediff.lambda_handler
+      Runtime: nodejs12.x
+      Layers:
+        - !Ref NodeResembleJSLayer
+      Timeout: 30 # SQSの可視性タイムアウトと揃える
+      MemorySize: 1024 # node-resemble-jsを安定動作させるのに必要なメモリ
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref UITesterS3
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !Ref UITesterS3
+      Events:
+        SQSQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ImageDiffProcessSQS.Arn
+            BatchSize: 1
+
   PupperteerLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
       ContentUri: 'lambda/layer/pupperteer'
+      CompatibleRuntimes:
+        - nodejs12.x
+    Metadata:
+      BuildMethod: nodejs12.x
+  NodeResembleJSLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: 'lambda/layer/node-resemble-js'
       CompatibleRuntimes:
         - nodejs12.x
     Metadata:
@@ -90,6 +141,24 @@ Resources:
       VisibilityTimeout: 30
       # メッセージをキューに貯めておく期間
       MessageRetentionPeriod: 86400
+  ImageDiffProcessSQS:
+    Type: AWS::SQS::Queue
+    Properties:
+      # 可視性タイムアウト
+      VisibilityTimeout: 30
+      # メッセージをキューに貯めておく期間
+      MessageRetentionPeriod: 86400
+      # DLQの設定
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt ImageDiffProcessDLQ.Arn
+        maxReceiveCount: 1
+  ImageDiffProcessDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      # 可視性タイムアウト
+      VisibilityTimeout: 30
+      # メッセージをキューに貯めておく期間
+      MessageRetentionPeriod: 86400
 
   UITesterS3:
     Type: "AWS::S3::Bucket"
@@ -112,6 +181,18 @@ Outputs:
   ProjectsQueingApi:
     Description: "Access Command"
     Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/queing/"
+  ImageDiffProcessQueingApi:
+    Description: "Access Command"
+    Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/imagediff-queing"
   ScreenshotProcessSQS:
     Description: "ScreenshotProcessSQS PATH"
     Value: !Sub "${ScreenshotProcessSQS}"
+  ScreenshotProcessDLQ:
+    Description: "ScreenshotProcessDLQ PATH"
+    Value: !Sub "${ScreenshotProcessDLQ}"
+  ImageDiffProcessSQS:
+    Description: "ImageDiffProcessSQS PATH"
+    Value: !Sub "${ImageDiffProcessSQS}"
+  ImageDiffProcessDLQ:
+    Description: "ImageDiffProcessDLQ PATH"
+    Value: !Sub "${ImageDiffProcessDLQ}"
