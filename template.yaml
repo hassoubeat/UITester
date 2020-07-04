@@ -1,10 +1,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+# 共通設定
 Globals:
   Function:
-    Timeout: 15
+    Timeout: 30
+    Environment:
+      Variables:
+        DYNAMODB_TABLE_NAME: !Ref UITesterDynamoDB
 
 Parameters:
   Env: # prod: 本番環境、stg: 検品環境、 local: ローカル開発環境
@@ -23,6 +26,8 @@ Resources:
       Handler: index.lambda_handler
       Runtime: nodejs12.x
       Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UITesterDynamoDB
         - SQSSendMessagePolicy:
             QueueName:
               !GetAtt ScreenshotProcessSQS.QueueName
@@ -47,6 +52,8 @@ Resources:
       Timeout: 30 # SQSの可視性タイムアウトと揃える
       MemorySize: 1600 # Pupperteerを動かす以上最低必要なメモリ
       Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UITesterDynamoDB
         - S3CrudPolicy:
             BucketName: !Ref UITesterS3
       Environment:
@@ -65,6 +72,8 @@ Resources:
       Handler: index.lambda_handler
       Runtime: nodejs12.x
       Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UITesterDynamoDB
         - SQSSendMessagePolicy:
             QueueName:
               !GetAtt ImageDiffProcessSQS.QueueName
@@ -89,6 +98,8 @@ Resources:
       Timeout: 30 # SQSの可視性タイムアウトと揃える
       MemorySize: 1024 # node-resemble-jsを安定動作させるのに必要なメモリ
       Policies:
+        - DynamoDBCrudPolicy:
+           TableName: !Ref UITesterDynamoDB
         - S3CrudPolicy:
             BucketName: !Ref UITesterS3
       Environment:
@@ -176,6 +187,44 @@ Resources:
             Effect: "Allow"
             Principal: "*"
             Resource: !Sub arn:aws:s3:::${UITesterS3}/*
+
+  UITesterDynamoDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${Env}-uitester"
+      # 属性の定義
+      AttributeDefinitions:
+        - AttributeName: Id
+          AttributeType: S
+        - AttributeName: ResultSetId
+          AttributeType: S
+        - AttributeName: ResultName
+          AttributeType: S
+      # プライマリキープライマリキー、レンジキーの指定
+      KeySchema:
+        - AttributeName: Id
+          KeyType: HASH
+      # GSIの定義
+      GlobalSecondaryIndexes:
+        # ユーザ名で検索するためのGSI
+        - IndexName: ResultSearchIndex
+          KeySchema:
+            - AttributeName: ResultSetId
+              KeyType: HASH
+            - AttributeName: ResultName
+              KeyType: RANGE
+          # 射影設定
+          Projection:
+            # 射影する属性の指定
+            ProjectionType: ALL
+          # GSIのスループットの指定
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 2
+      # スループットの指定
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
 
 Outputs:
   ProjectsQueingApi:
