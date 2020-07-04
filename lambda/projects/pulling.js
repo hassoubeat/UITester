@@ -23,23 +23,29 @@ exports.lambda_handler = async (event, context) => {
     let action = JSON.parse(event['Records'][0]['body']);
     console.log(action);
 
-    // 初期処理
+    // Pupperteer初期処理
     browser = await puppeteer.launch({
       args: chromium.args.concat(['--lang=ja']),
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath,
       headless: chromium.headless,
     });
-
     let page = await browser.newPage();
     await page.setExtraHTTPHeaders({
       'Accept-Language': 'ja-JP'
     });
 
+    // ブラウザ設定
+    const browserSettings = action.browserSettings
+    if (browserSettings.deviceType) {
+      const device = puppeteer.devices[browserSettings.deviceType]; 
+      await page.emulate(device);
+    } else {
+      await page.setUserAgent(browserSettings.userAgent);
+      await page.setViewport(browserSettings.viewport);
+    }
+
     // ブラウザ操作
-    const iPhone = puppeteer.devices['iPhone 6'];
-    await page.emulate(iPhone);
-    
     for(let process of action.actionProcesies) {
       console.log(process);
       
@@ -74,13 +80,10 @@ exports.lambda_handler = async (event, context) => {
         }
     };
     
-    await page.emulate(iPhone);
+    // スクリーンショット取得
+    const screenshot = await page.screenshot(action.screenshotOptions);
     
-    // const screenshot = await page.screenshot({fullPage:true});
-    const screenshot = await page.screenshot();
-    
-    console.log(screenshot);
-    
+    // S3にスクリーンショット保存
     params = {
       Bucket: SAVE_BUCKET_NAME,
       Key: `result/${action.actionId}.png`,
