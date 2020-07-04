@@ -16,11 +16,11 @@ Parameters:
     Default: local
 
 Resources:
-  ProjectsQueingFunction:
+  ScreenshotProcessQueingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/projects/
-      Handler: queing.lambda_handler
+      CodeUri: lambda/projects/ScreenshotProcessQueingFunction/
+      Handler: index.lambda_handler
       Runtime: nodejs12.x
       Policies:
         - SQSSendMessagePolicy:
@@ -34,13 +34,13 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref UITesterApi
-            Path: /projects/queing
+            Path: /projects/screenshot-queing
             Method: post
   ScreenshotProcessFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/projects/
-      Handler: pulling.lambda_handler
+      CodeUri: lambda/projects/ScreenshotProcessFunction/
+      Handler: index.lambda_handler
       Runtime: nodejs12.x
       Layers:
         - !Ref PupperteerLayer
@@ -61,8 +61,8 @@ Resources:
   ImageDiffProcessQueingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/projects/
-      Handler: imagediff-queing.lambda_handler
+      CodeUri: lambda/projects/ImageDiffProcessQueingFunction/
+      Handler: index.lambda_handler
       Runtime: nodejs12.x
       Policies:
         - SQSSendMessagePolicy:
@@ -81,8 +81,8 @@ Resources:
   ImageDiffProcessFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/projects/
-      Handler: imagediff.lambda_handler
+      CodeUri: lambda/projects/ImageDiffProcessFunction/
+      Handler: index.lambda_handler
       Runtime: nodejs12.x
       Layers:
         - !Ref NodeResembleJSLayer
@@ -180,7 +180,7 @@ Resources:
 Outputs:
   ProjectsQueingApi:
     Description: "Access Command"
-    Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/queing/"
+    Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/screenshot-queing"
   ImageDiffProcessQueingApi:
     Description: "Access Command"
     Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/imagediff-queing"
