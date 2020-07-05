@@ -14,6 +14,16 @@ module.exports.put = async (item) => {
     Item: item
   }).promise();
 }
+
+// データ更新
+module.exports.update = async (updateObj) => {
+  return await DYNAMODB.update({
+    TableName: DYNAMODB_TABLE_NAME,
+    Key: updateObj.Key,
+    ExpressionAttributeValues: updateObj.ExpressionAttributeValues,
+    UpdateExpression: updateObj.UpdateExpression
+  }).promise();
+}
   
 // ResultSet用の現在のアトミックカウンターからインクリメントした値を取得
 module.exports.getResultSetId = async () => {

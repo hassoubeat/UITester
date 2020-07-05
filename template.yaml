@@ -51,6 +51,7 @@ Resources:
       Runtime: nodejs12.x
       Layers:
         - !Ref PupperteerLayer
+        - !Ref MyLibLayer
       Timeout: 30 # SQSの可視性タイムアウトと揃える
       MemorySize: 1600 # Pupperteerを動かす以上最低必要なメモリ
       Policies:

@@ -8,6 +8,8 @@ const puppeteer = chromium.puppeteer;
 const S3 = new AWS.S3();
 const SAVE_BUCKET_NAME = process.env['S3_BUCKET_NAME']
 
+const dynamodbDao = require('dynamodb-dao');
+
 // 処理サイクル
 const GOTO = 'GOTO';
 const WAIT = 'WAIT';
@@ -17,14 +19,11 @@ const INPUT = 'INPUT';
 
 // メイン処理
 exports.lambda_handler = async (event, context) => {
-  let browser = null;
-
   try {
-    let action = JSON.parse(event['Records'][0]['body']);
-    console.log(action);
+    var action = JSON.parse(event['Records'][0]['body']);
 
     // Pupperteer初期処理
-    browser = await puppeteer.launch({
+    var browser = await puppeteer.launch({
       args: chromium.args.concat(['--lang=ja']),
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath,
@@ -84,17 +83,41 @@ exports.lambda_handler = async (event, context) => {
     const screenshot = await page.screenshot(action.screenshotOptions);
     
     // S3にスクリーンショット保存
-    params = {
+    const s3PutParams = {
       Bucket: SAVE_BUCKET_NAME,
-      Key: `result/${action.actionId}.png`,
+      Key: `result/${action.resultSetId}/${action.actionId}.png`,
       Body: screenshot,
       ContentType: 'image/png'
     }
-    result = await S3.putObject(params).promise();
+    await S3.putObject(s3PutParams).promise();
 
-    console.log(result);
+    // 保存後にDynamoDBのステータス更新
+    await dynamodbDao.update({
+      Key: {
+        Id : action.resultId
+      },
+      UpdateExpression: "Set Progress=:progress, S3ObjectKey=:s3ObjectKey",
+      ExpressionAttributeValues: {
+        ":progress": "処理済",
+        ":s3ObjectKey": s3PutParams.Key
+      }
+    });
     
   } catch (error) {
+    // エラー発生時、DynamoDBのステータス更新
+
+    // 保存後にDynamoDBのステータス更新
+    await dynamodbDao.update({
+      Key: {
+        Id : action.resultId
+      },
+      UpdateExpression: "Set Progress=:progress, ErrorMessage=:errorMessage",
+      ExpressionAttributeValues: {
+        ":progress": "エラー",
+        ":errorMessage": error.message
+      }
+    });
+
     return context.fail(error);
   } finally {
     if (browser !== null) {
