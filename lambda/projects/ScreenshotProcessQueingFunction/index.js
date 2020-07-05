@@ -5,7 +5,6 @@ const dynamodbDao = require('dynamodb-dao');
 
 exports.lambda_handler = async (event, context) => {
   const payload = JSON.parse(event.body);
-  console.log(payload);
 
   var result = {};
 
@@ -17,34 +16,37 @@ exports.lambda_handler = async (event, context) => {
       ProjectName: payload.project.projectName
   });
 
-  for(const action of payload.project.actions) {
-    console.log(action);
+  result[resultSetId] = {};
 
+  for(const action of payload.project.actions) {
     try {
       // Actionの内容をSQSに登録
-      result[action.actionId] = await SQS.sendMessage({
+      await SQS.sendMessage({
         MessageBody: JSON.stringify(action),
         QueueUrl: SQS_QUEUE_URL,
       }).promise();
 
       // DynamoDBにメタデータ(Result)の登録
-      await dynamodbDao.put({
-          Id: `Result-${await dynamodbDao.getResultId()}`,
-          Type: 'SCREENSHOT', 
-          ResultName: action.actionName,
-          Progress: '未処理',
-          ResultSetId: resultSetId
-      });
+      const putParams = {
+        Id: `Result-${await dynamodbDao.getResultId()}`,
+        Type: 'SCREENSHOT', 
+        ResultName: action.actionName,
+        Progress: '未処理',
+        ResultSetId: resultSetId
+      }
+      await dynamodbDao.put(putParams);
+
+      result[resultSetId][action.actionId] = putParams;
 
     } catch (error) {
-      result[action.actionId] = error;
+      result[resultSetId][action.actionId] = error.message;
     }
   }
 
   console.log(result);
 
   try {
-    response = {
+    var response = {
       'statusCode': 200,
       'body': JSON.stringify({
         message: result,
