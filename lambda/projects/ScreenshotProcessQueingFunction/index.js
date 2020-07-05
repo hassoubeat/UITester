@@ -20,21 +20,26 @@ exports.lambda_handler = async (event, context) => {
 
   for(const action of payload.project.actions) {
     try {
-      // Actionの内容をSQSに登録
-      await SQS.sendMessage({
-        MessageBody: JSON.stringify(action),
-        QueueUrl: SQS_QUEUE_URL,
-      }).promise();
-
+      const resultId = `Result-${await dynamodbDao.getResultId()}`;
       // DynamoDBにメタデータ(Result)の登録
       const putParams = {
-        Id: `Result-${await dynamodbDao.getResultId()}`,
+        Id: resultId,
         Type: 'SCREENSHOT', 
         ResultName: action.actionName,
         Progress: '未処理',
         ResultSetId: resultSetId
       }
       await dynamodbDao.put(putParams);
+
+      // キューイングデータにID情報を追加
+      action.resultSetId = resultSetId;
+      action.resultId = resultId;
+
+      // Actionの内容をSQSに登録
+      await SQS.sendMessage({
+        MessageBody: JSON.stringify(action),
+        QueueUrl: SQS_QUEUE_URL,
+      }).promise();
 
       result[resultSetId][action.actionId] = putParams;
 
