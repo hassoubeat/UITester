@@ -25,6 +25,8 @@ Resources:
       CodeUri: lambda/projects/ScreenshotProcessQueingFunction/
       Handler: index.lambda_handler
       Runtime: nodejs12.x
+      Layers:
+        - !Ref MyLibLayer
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref UITesterDynamoDB
@@ -124,6 +126,14 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       ContentUri: 'lambda/layer/node-resemble-js'
+      CompatibleRuntimes:
+        - nodejs12.x
+    Metadata:
+      BuildMethod: nodejs12.x
+  MyLibLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: 'lambda/layer/my-lib'
       CompatibleRuntimes:
         - nodejs12.x
     Metadata:

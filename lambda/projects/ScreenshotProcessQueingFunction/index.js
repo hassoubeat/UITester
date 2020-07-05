@@ -1,9 +1,7 @@
 const AWS = require('aws-sdk');
 const SQS = new AWS.SQS({apiVersion: '2012-11-05'});
-const DYNAMODB = new AWS.DynamoDB.DocumentClient();
-
 const SQS_QUEUE_URL = process.env.SCREENSHOT_PROCESS_SQS;
-const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME
+const dynamodbDao = require('dynamodb-dao');
 
 exports.lambda_handler = async (event, context) => {
   const payload = JSON.parse(event.body);
@@ -12,14 +10,12 @@ exports.lambda_handler = async (event, context) => {
   var result = {};
 
   // DynamoDBにメタデータ(Result-Set)の登録
-  await DYNAMODB.put({
-    TableName: DYNAMODB_TABLE_NAME,
-    Item: {
-      Id: 'Result-Set-1',
+  const resultSetId = `Result-Set-${await dynamodbDao.getResultSetId()}`
+  await dynamodbDao.put({
+      Id: resultSetId,
       Type: 'SCREENSHOT', 
       ProjectName: payload.project.projectName
-    }
-  }).promise();
+  });
 
   for(const action of payload.project.actions) {
     console.log(action);
@@ -32,16 +28,13 @@ exports.lambda_handler = async (event, context) => {
       }).promise();
 
       // DynamoDBにメタデータ(Result)の登録
-      await DYNAMODB.put({
-        TableName: DYNAMODB_TABLE_NAME,
-        Item: {
-          Id: 'Result-1',
+      await dynamodbDao.put({
+          Id: `Result-${await dynamodbDao.getResultId()}`,
           Type: 'SCREENSHOT', 
           ResultName: action.actionName,
           Progress: '未処理',
-          ResultSetId: 'Result-Set-1'
-        }
-      }).promise();
+          ResultSetId: resultSetId
+      });
 
     } catch (error) {
       result[action.actionId] = error;
