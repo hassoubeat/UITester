@@ -1,7 +1,9 @@
 const AWS = require('aws-sdk');
 const SQS = new AWS.SQS({apiVersion: '2012-11-05'});
 const SQS_QUEUE_URL = process.env.SCREENSHOT_PROCESS_SQS;
+
 const dynamodbDao = require('dynamodb-dao');
+const UITESTER_DYNAMODB_TABLE_NAME = process.env['UITESTER_DYNAMODB_TABLE_NAME'];
 
 exports.lambda_handler = async (event, context) => {
   const payload = JSON.parse(event.body);
@@ -9,18 +11,21 @@ exports.lambda_handler = async (event, context) => {
   var result = {};
 
   // DynamoDBにメタデータ(Result-Set)の登録
-  const resultSetId = `Result-Set-${await dynamodbDao.getResultSetId()}`
-  await dynamodbDao.put({
+  const resultSetId = `Result-Set-${await dynamodbDao.getResultSetId(UITESTER_DYNAMODB_TABLE_NAME)}`
+  await dynamodbDao.put(
+    UITESTER_DYNAMODB_TABLE_NAME,
+    {
       Id: resultSetId,
       Type: 'SCREENSHOT', 
       ProjectName: payload.project.projectName
-  });
+    }
+  );
 
   result[resultSetId] = {};
 
   for(const action of payload.project.actions) {
     try {
-      const resultId = `Result-${await dynamodbDao.getResultId()}`;
+      const resultId = `Result-${await dynamodbDao.getResultId(UITESTER_DYNAMODB_TABLE_NAME)}`;
       // DynamoDBにメタデータ(Result)の登録
       const putParams = {
         Id: resultId,
@@ -29,7 +34,7 @@ exports.lambda_handler = async (event, context) => {
         Progress: '未処理',
         ResultSetId: resultSetId
       }
-      await dynamodbDao.put(putParams);
+      await dynamodbDao.put(UITESTER_DYNAMODB_TABLE_NAME, putParams);
 
       // キューイングデータにID情報を追加
       action.resultSetId = resultSetId;

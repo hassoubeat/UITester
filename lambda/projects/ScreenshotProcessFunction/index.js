@@ -9,6 +9,7 @@ const S3 = new AWS.S3();
 const SAVE_BUCKET_NAME = process.env['S3_BUCKET_NAME']
 
 const dynamodbDao = require('dynamodb-dao');
+const UITESTER_DYNAMODB_TABLE_NAME = process.env['UITESTER_DYNAMODB_TABLE_NAME'];
 
 // 処理サイクル
 const GOTO = 'GOTO';
@@ -92,31 +93,37 @@ exports.lambda_handler = async (event, context) => {
     await S3.putObject(s3PutParams).promise();
 
     // 保存後にDynamoDBのステータス更新
-    await dynamodbDao.update({
-      Key: {
-        Id : action.resultId
-      },
-      UpdateExpression: "Set Progress=:progress, S3ObjectKey=:s3ObjectKey",
-      ExpressionAttributeValues: {
-        ":progress": "処理済",
-        ":s3ObjectKey": s3PutParams.Key
+    await dynamodbDao.update(
+      UITESTER_DYNAMODB_TABLE_NAME,
+      {
+        Key: {
+          Id : action.resultId
+        },
+        UpdateExpression: "Set Progress=:progress, S3ObjectKey=:s3ObjectKey",
+        ExpressionAttributeValues: {
+          ":progress": "処理済",
+          ":s3ObjectKey": s3PutParams.Key
+        }
       }
-    });
+    );
     
   } catch (error) {
     // エラー発生時、DynamoDBのステータス更新
 
     // 保存後にDynamoDBのステータス更新
-    await dynamodbDao.update({
-      Key: {
-        Id : action.resultId
-      },
-      UpdateExpression: "Set Progress=:progress, ErrorMessage=:errorMessage",
-      ExpressionAttributeValues: {
-        ":progress": "エラー",
-        ":errorMessage": error.message
+    await dynamodbDao.update(
+      UITESTER_DYNAMODB_TABLE_NAME,
+      {
+        Key: {
+          Id : action.resultId
+        },
+        UpdateExpression: "Set Progress=:progress, ErrorMessage=:errorMessage",
+        ExpressionAttributeValues: {
+          ":progress": "エラー",
+          ":errorMessage": error.message
+        }
       }
-    });
+    );
 
     return context.fail(error);
   } finally {
