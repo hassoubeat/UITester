@@ -71,7 +71,8 @@ exports.lambda_handler = async (event, context) => {
         originS3ObjectKey: originResult.S3ObjectKey,
         targetS3ObjectKey: targetResult.S3ObjectKey,
         resultSetId: resultSetId,
-        resultId: resultId
+        resultId: resultId,
+        resultName: originResult.ResultName
       }
 
       // 比較処理用のメッセージをSQSに登録
