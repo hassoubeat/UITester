@@ -3,7 +3,10 @@ const resemble = require('node-resemble-js');
 
 const S3 = new AWS.S3();
 const fs = require('fs');
-const SAVE_BUCKET_NAME = process.env['S3_BUCKET_NAME']
+const SAVE_BUCKET_NAME = process.env['S3_BUCKET_NAME'];
+
+const dynamodbDao = require('dynamodb-dao');
+const UITESTER_DYNAMODB_TABLE_NAME = process.env['UITESTER_DYNAMODB_TABLE_NAME'];
 
 // 差分比較
 const compareTo = (file1, file2) => {
@@ -29,28 +32,49 @@ const syncStream = (diffData) => {
 }
 
 exports.lambda_handler = async (event, context) => {
+  var diffPayload = JSON.parse(event['Records'][0]['body']);
+
   // S3から比較対象ファイルの取得
   const originImage = await S3.getObject({
     Bucket: SAVE_BUCKET_NAME,
-    Key: 'origin/Action-1.png'
+    Key: diffPayload.originS3ObjectKey
   }).promise();
   const targetImage = await S3.getObject({
     Bucket: SAVE_BUCKET_NAME,
-    Key: 'result/Action-1.png'
+    Key: diffPayload.targetS3ObjectKey
   }).promise();
 
   // ファイルの比較、ストリームデータへの変換
   const diffData = await compareTo(originImage, targetImage);
   console.log(diffData);
 
-  const fileContent = await syncStream(diffData);
+  const diffFileContent = await syncStream(diffData);
 
   // S3に差分結果をアップロード
-  const result = await S3.putObject({
+  const s3PutParams = {
     Bucket: SAVE_BUCKET_NAME,
-    Key: `diff-result/diff_example.png`,
-    Body: fileContent,
+    Key: `result/${diffPayload.resultSetId}/${diffPayload.resultName}.png`,
+    Body: diffFileContent,
     ContentType: 'image/png'
-  }).promise();
-  console.log(result);
+  }
+  await S3.putObject(s3PutParams).promise();
+
+  // 保存後にDynamoDBのステータス更新
+  await dynamodbDao.update({
+    TableName: UITESTER_DYNAMODB_TABLE_NAME,
+    Key: {
+      Id : diffPayload.resultId
+    },
+    UpdateExpression: "Set Progress=:progress, S3ObjectKey=:s3ObjectKey, DiffResultDetail=:diffResultDetail",
+    ExpressionAttributeValues: {
+      ":progress": "処理済",
+      ":s3ObjectKey": s3PutParams.Key,
+      ":diffResultDetail": JSON.stringify({
+        isSameDimensions: diffData.isSameDimensions,
+        dimensionDifference: diffData.dimensionDifference,
+        misMatchPercentage: diffData.misMatchPercentage,
+        analysisTime: diffData.analysisTime
+      })
+    }
+  });
 };
