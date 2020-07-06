@@ -86,7 +86,7 @@ exports.lambda_handler = async (event, context) => {
     // S3にスクリーンショット保存
     const s3PutParams = {
       Bucket: SAVE_BUCKET_NAME,
-      Key: `result/${action.resultSetId}/${action.actionId}.png`,
+      Key: `result/${action.resultSetId}/${action.actionName}.png`,
       Body: screenshot,
       ContentType: 'image/png'
     }
