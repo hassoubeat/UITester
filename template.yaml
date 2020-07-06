@@ -5,6 +5,8 @@ Transform: AWS::Serverless-2016-10-31
 Globals:
   Function:
     Timeout: 30
+    Layers:
+      - !Ref MyLibLayer
     Environment:
       Variables:
         UITESTER_DYNAMODB_TABLE_NAME: !Ref UITesterDynamoDB
@@ -25,8 +27,6 @@ Resources:
       CodeUri: lambda/projects/ScreenshotProcessQueingFunction/
       Handler: index.lambda_handler
       Runtime: nodejs12.x
-      Layers:
-        - !Ref MyLibLayer
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref UITesterDynamoDB
@@ -51,7 +51,6 @@ Resources:
       Runtime: nodejs12.x
       Layers:
         - !Ref PupperteerLayer
-        - !Ref MyLibLayer
       Timeout: 30 # SQSの可視性タイムアウトと揃える
       MemorySize: 1600 # Pupperteerを動かす以上最低必要なメモリ
       Policies:
