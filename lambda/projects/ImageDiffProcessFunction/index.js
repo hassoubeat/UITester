@@ -29,30 +29,28 @@ const syncStream = (diffData) => {
 }
 
 exports.lambda_handler = async (event, context) => {
-    // TODO 全体的にMock状態なのでDynamoDB、全体構成図の設定後に動的に実装するようにする
+  // S3から比較対象ファイルの取得
+  const originImage = await S3.getObject({
+    Bucket: SAVE_BUCKET_NAME,
+    Key: 'origin/Action-1.png'
+  }).promise();
+  const targetImage = await S3.getObject({
+    Bucket: SAVE_BUCKET_NAME,
+    Key: 'result/Action-1.png'
+  }).promise();
 
-    // S3から比較対象ファイルの取得
-    const originImage = await S3.getObject({
-      Bucket: SAVE_BUCKET_NAME,
-      Key: 'origin/Action-1.png'
-    }).promise();
-    const targetImage = await S3.getObject({
-      Bucket: SAVE_BUCKET_NAME,
-      Key: 'result/Action-1.png'
-    }).promise();
+  // ファイルの比較、ストリームデータへの変換
+  const diffData = await compareTo(originImage, targetImage);
+  console.log(diffData);
 
-    // ファイルの比較、ストリームデータへの変換
-    const diffData = await compareTo(originImage, targetImage);
-    console.log(diffData);
+  const fileContent = await syncStream(diffData);
 
-    const fileContent = await syncStream(diffData);
-
-    // S3に差分結果をアップロード
-    const result = await S3.putObject({
-      Bucket: SAVE_BUCKET_NAME,
-      Key: `diff-result/diff_example.png`,
-      Body: fileContent,
-      ContentType: 'image/png'
-    }).promise();
-    console.log(result);
+  // S3に差分結果をアップロード
+  const result = await S3.putObject({
+    Bucket: SAVE_BUCKET_NAME,
+    Key: `diff-result/diff_example.png`,
+    Body: fileContent,
+    ContentType: 'image/png'
+  }).promise();
+  console.log(result);
 };
