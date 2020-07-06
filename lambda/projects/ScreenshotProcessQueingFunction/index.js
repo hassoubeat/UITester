@@ -12,14 +12,14 @@ exports.lambda_handler = async (event, context) => {
 
   // DynamoDBにメタデータ(Result-Set)の登録
   const resultSetId = `Result-Set-${await dynamodbDao.getResultSetId(UITESTER_DYNAMODB_TABLE_NAME)}`
-  await dynamodbDao.put(
-    UITESTER_DYNAMODB_TABLE_NAME,
-    {
+  await dynamodbDao.put({
+    TableName: UITESTER_DYNAMODB_TABLE_NAME,
+    Item: {
       Id: resultSetId,
       Type: 'SCREENSHOT', 
       ProjectName: payload.project.projectName
     }
-  );
+  });
 
   result[resultSetId] = {};
 
@@ -27,14 +27,17 @@ exports.lambda_handler = async (event, context) => {
     try {
       const resultId = `Result-${await dynamodbDao.getResultId(UITESTER_DYNAMODB_TABLE_NAME)}`;
       // DynamoDBにメタデータ(Result)の登録
-      const putParams = {
-        Id: resultId,
-        Type: 'SCREENSHOT', 
-        ResultName: action.actionName,
-        Progress: '未処理',
-        ResultSetId: resultSetId
+      const putObject = {
+        TableName: UITESTER_DYNAMODB_TABLE_NAME,
+        Item: {
+          Id: resultId,
+          Type: 'SCREENSHOT', 
+          ResultName: action.actionName,
+          Progress: '未処理',
+          ResultSetId: resultSetId
+        }
       }
-      await dynamodbDao.put(UITESTER_DYNAMODB_TABLE_NAME, putParams);
+      await dynamodbDao.put(putObject);
 
       // キューイングデータにID情報を追加
       action.resultSetId = resultSetId;
@@ -46,7 +49,7 @@ exports.lambda_handler = async (event, context) => {
         QueueUrl: SQS_QUEUE_URL,
       }).promise();
 
-      result[resultSetId][action.actionId] = putParams;
+      result[resultSetId][action.actionId] = putObject.Item;
 
     } catch (error) {
       result[resultSetId][action.actionId] = error.message;

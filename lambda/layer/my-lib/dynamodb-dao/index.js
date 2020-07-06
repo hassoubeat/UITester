@@ -6,21 +6,18 @@ const RESULT_SET_COUNTER_ID = 'ResultSetIdCounter';
 const RESULT_COUNTER_ID = 'ResultIdCounter';
 
 // データ登録
-module.exports.put = async (tableName, item) => {
-  return await DYNAMODB.put({
-    TableName: tableName,
-    Item: item
-  }).promise();
+module.exports.put = async (putObj) => {
+  return await DYNAMODB.put(putObj).promise();
 }
 
 // データ更新
-module.exports.update = async (tableName, updateObj) => {
-  return await DYNAMODB.update({
-    TableName: tableName,
-    Key: updateObj.Key,
-    ExpressionAttributeValues: updateObj.ExpressionAttributeValues,
-    UpdateExpression: updateObj.UpdateExpression
-  }).promise();
+module.exports.update = async (updateObj) => {
+  return await DYNAMODB.update(updateObj).promise();
+}
+
+// データ検索
+module.exports.query = async (queryObj) => {
+  return await DYNAMODB.query(queryObj).promise();
 }
   
 // ResultSet用の現在のアトミックカウンターからインクリメントした値を取得
