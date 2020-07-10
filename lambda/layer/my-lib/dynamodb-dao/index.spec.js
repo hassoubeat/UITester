@@ -1,8 +1,6 @@
 const dynamoDao = require("./index");
 
 const AWS = require('aws-sdk');
-// const credentials = new AWS.SharedIniFileCredentials({ profile: 'localstack' });
-// AWS.config.credentials = credentials;
 const config = {
   region: "ap-northeast-1",
   endpoint: "http://localhost:4566"  
