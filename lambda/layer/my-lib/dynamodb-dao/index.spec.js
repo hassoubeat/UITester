@@ -44,6 +44,18 @@ describe('DynamoDB Dao Success Group', () => {
     expect(response).toEqual({"ConsumedCapacity":{"TableName":uitesterTableName,"CapacityUnits":1}});
   });
 
+  test('dynamoDao getResultSetId test', async () => {
+    console.log("dynamoDao getResultSetId test");
+    const response = await dynamoDao.getResultSetId(dynamoDbDocumentClient, uitesterTableName);
+    expect(response).toBe(1);
+  });
+
+  test('dynamoDao getResultId test', async () => {
+    console.log("dynamoDao getResultId test");
+    const response = await dynamoDao.getResultId(dynamoDbDocumentClient, uitesterTableName);
+    expect(response).toBe(1);
+  });
+
   // afterEach( async () => {
   // });
 
