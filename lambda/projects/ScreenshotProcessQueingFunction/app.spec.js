@@ -13,25 +13,30 @@ const diComponents = {
 };
 
 // 環境変数の設定
-process.env.UITESTER_SQS_QUEUE_NAME = "local-uitester"
-process.env.SCREENSHOT_PROCESS_SQS = `${config.endpoint}/queue/local-uitester`
-process.env.UITESTER_DYNAMODB_TABLE_NAME = "local-uitester"
-
-
-const dynamoDB = new AWS.DynamoDB(config);
+process.env.UITESTER_SQS_QUEUE_NAME = "dummy"
+process.env.SCREENSHOT_PROCESS_SQS = `dummy`
+process.env.UITESTER_DYNAMODB_TABLE_NAME = "dummy"
 
 const screenshotProcessQueing = require("./app");
 
+// jestのマニュアルモック
+jest.mock('dynamodb-dao');
+
+// DIで利用する処理をスタブ化
+diComponents.SQS.sendMessage =  () => {
+  console.log("stub");
+  return {
+    promise: () => {
+      return {status: 200}
+    }
+  }
+}
+
 describe('ScreenshotProcessQueingFunction Success Group', () => {
 
-  beforeAll( async () => {
-    console.log("beforeAll");
-
-    // DynamoDB テーブル作成
-    await createTestTable();
-    // SQS キュー作成
-    await SQS.createQueue({QueueName: process.env.UITESTER_SQS_QUEUE_NAME}).promise();
-  });
+  // beforeAll( async () => {
+  //   console.log("beforeAll");
+  // });
 
   // beforeEach( async () => {
   // });
@@ -53,7 +58,7 @@ describe('ScreenshotProcessQueingFunction Success Group', () => {
               "Type": "SCREENSHOT"
           },
           "Action-2": {
-              "Id": "Result-2",
+              "Id": "Result-1",
               "Progress": "未処理",
               "ResultName": "iPhone 6(縦)",
               "ResultSetId": "Result-Set-1",
@@ -66,41 +71,7 @@ describe('ScreenshotProcessQueingFunction Success Group', () => {
   // afterEach( async () => {
   // });
 
-  afterAll( async () => {
-    console.log("afterAll");
-    // DynamoDB テーブル削除
-    await deleteTestTable();
-    // SQS キュー削除
-    await SQS.deleteQueue({QueueUrl: process.env.SCREENSHOT_PROCESS_SQS}).promise();
-  });
+  // afterAll( async () => {
+  //   console.log("afterAll");
+  // });
 });
-
-async function createTestTable() {
-  var tableParams = {
-    TableName: process.env.UITESTER_DYNAMODB_TABLE_NAME,
-    AttributeDefinitions: [
-      { AttributeName: 'Id', AttributeType: 'S'},
-      { AttributeName: 'ResultSetId', AttributeType: 'S' },
-      { AttributeName: 'ResultName', AttributeType: 'S' }
-    ],
-    KeySchema: [
-      { AttributeName: 'Id', KeyType: 'HASH' }
-    ],
-    GlobalSecondaryIndexes: [{
-      IndexName: "ResultSearchIndex",
-      KeySchema: [
-        { AttributeName: 'ResultSetId', KeyType: 'HASH' },
-        { AttributeName: 'ResultName', KeyType: 'RANGE' }
-      ],
-      Projection: { ProjectionType: "ALL" },
-      ProvisionedThroughput: { ReadCapacityUnits: 2, WriteCapacityUnits: 2 }
-    }],
-    ProvisionedThroughput: { ReadCapacityUnits: 2, WriteCapacityUnits: 2 }
-  };
-  resp = await dynamoDB.createTable(tableParams).promise();
-}
-
-async function deleteTestTable() {
-  const tableParams = { TableName: process.env.UITESTER_DYNAMODB_TABLE_NAME }
-  await dynamoDB.deleteTable(tableParams).promise();
-}
