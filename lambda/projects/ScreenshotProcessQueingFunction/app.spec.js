@@ -1,12 +1,8 @@
 const AWS = require('aws-sdk');
-const config = {
-  region: "ap-northeast-1",
-  endpoint: "http://localhost:4566"  
-}
 
 // テスト対象のDI用コンポーネント作成
-const SQS = new AWS.SQS(config);
-const DYNAMODB = new AWS.DynamoDB.DocumentClient(config);
+const SQS = new AWS.SQS();
+const DYNAMODB = new AWS.DynamoDB.DocumentClient();
 const diComponents = {
   SQS: SQS,
   DYNAMODB: DYNAMODB
@@ -24,7 +20,6 @@ jest.mock('dynamodb-dao');
 
 // DIで利用する処理をスタブ化
 diComponents.SQS.sendMessage =  () => {
-  console.log("stub");
   return {
     promise: () => {
       return {status: 200}
