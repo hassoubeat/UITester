@@ -12,6 +12,14 @@ dynamoDbDao.query = async (dynamoDB, queryObj) => {
   return {};
 }
 
+dynamoDbDao.scan = async (dynamoDB, scanObj) => {
+  return {
+    Items: [],
+    Count: 0,
+    ScannedCount: 0
+  };
+}
+
 dynamoDbDao.getResultSetId = async (dynamoDB, tableName) => {
   return 1;
 }
