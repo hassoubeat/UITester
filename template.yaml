@@ -254,7 +254,10 @@ Resources:
         WriteCapacityUnits: 2
 
 Outputs:
-  ProjectsQueingApi:
+  GetResultSetListFunction:
+    Description: "Access Command"
+    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/"
+  ScreenshotProcessQueingFunction:
     Description: "Access Command"
     Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/screenshot-queing"
   ImageDiffProcessQueingApi:
