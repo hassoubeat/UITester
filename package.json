@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.711.0",
+    "aws-sdk-mock": "^5.1.0",
+    "jest": "^26.1.0"
+  }
+}

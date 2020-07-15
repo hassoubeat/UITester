@@ -32,6 +32,7 @@ const syncStream = (diffData) => {
 }
 
 exports.lambda_handler = async (event, context) => {
+  const dynamoDbDocumentClient = new AWS.DynamoDB.DocumentClient();
   var diffPayload = JSON.parse(event['Records'][0]['body']);
 
   // S3から比較対象ファイルの取得
@@ -60,21 +61,24 @@ exports.lambda_handler = async (event, context) => {
   await S3.putObject(s3PutParams).promise();
 
   // 保存後にDynamoDBのステータス更新
-  await dynamodbDao.update({
-    TableName: UITESTER_DYNAMODB_TABLE_NAME,
-    Key: {
-      Id : diffPayload.resultId
-    },
-    UpdateExpression: "Set Progress=:progress, S3ObjectKey=:s3ObjectKey, DiffResultDetail=:diffResultDetail",
-    ExpressionAttributeValues: {
-      ":progress": "処理済",
-      ":s3ObjectKey": s3PutParams.Key,
-      ":diffResultDetail": JSON.stringify({
-        isSameDimensions: diffData.isSameDimensions,
-        dimensionDifference: diffData.dimensionDifference,
-        misMatchPercentage: diffData.misMatchPercentage,
-        analysisTime: diffData.analysisTime
-      })
+  await dynamodbDao.update(
+    dynamoDbDocumentClient,
+    {
+      TableName: UITESTER_DYNAMODB_TABLE_NAME,
+      Key: {
+        Id : diffPayload.resultId
+      },
+      UpdateExpression: "Set Progress=:progress, S3ObjectKey=:s3ObjectKey, DiffResultDetail=:diffResultDetail",
+      ExpressionAttributeValues: {
+        ":progress": "処理済",
+        ":s3ObjectKey": s3PutParams.Key,
+        ":diffResultDetail": JSON.stringify({
+          isSameDimensions: diffData.isSameDimensions,
+          dimensionDifference: diffData.dimensionDifference,
+          misMatchPercentage: diffData.misMatchPercentage,
+          analysisTime: diffData.analysisTime
+        })
+      }
     }
-  });
+  );
 };
