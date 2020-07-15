@@ -16,6 +16,11 @@ module.exports.update = async (dynamoDB, updateObj) => {
 module.exports.query = async (dynamoDB, queryObj) => {
   return await dynamoDB.query(queryObj).promise();
 }
+
+// データスキャン
+module.exports.scan = async (dynamoDB, scanObj) => {
+  return await dynamoDB.scan(scanObj).promise();
+}
   
 // ResultSet用の現在のアトミックカウンターからインクリメントした値を取得
 module.exports.getResultSetId = async (dynamoDB, tableName) => {

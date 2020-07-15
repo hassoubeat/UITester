@@ -18,30 +18,68 @@ describe('DynamoDB Dao Success Group', () => {
     // テーブル作成
     await createTestTable();
     // 初期データ投入
-    const forGetTestObj = {
+    const testObj1 = {
       TableName: uitesterTableName,
-      Item: { Id: "for-get-test-object" }
+      Item: { Id: "get-test-object-1" }
     }
-    await dynamoDbDocumentClient.put(forGetTestObj).promise();
+    const testObj2 = {
+      TableName: uitesterTableName,
+      Item: { Id: "get-test-object-2" }
+    }
+    const testObj3 = {
+      TableName: uitesterTableName,
+      Item: { Id: "other-test-object-1" }
+    }
+    await dynamoDbDocumentClient.put(testObj1).promise();
+    await dynamoDbDocumentClient.put(testObj2).promise();
+    await dynamoDbDocumentClient.put(testObj3).promise();
   });
 
   // beforeEach( async () => {
   // });
 
+  // データ投入(put)のテスト
   test('dynamoDao put test', async () => {
     console.log("dynamoDao put test");
+    const resultSetId = "Result-Set-1";
     const response = await dynamoDao.put(
       dynamoDbDocumentClient,
       {
         TableName: uitesterTableName,
         Item: {
-          Id: "Result-Set-1",
+          Id: resultSetId,
           Type: 'SCREENSHOT',
           ProjectName: "Project-1"
         }
       }
     );
     expect(response).toEqual({"ConsumedCapacity":{"TableName":uitesterTableName,"CapacityUnits":1}});
+
+    // 後始末
+    await deleteColumn(resultSetId);
+  });
+
+  // データスキャン(scan)のテスト
+  test('dynamoDao scan test', async () => {
+    console.log("dynamoDao scan test");
+    const response = await dynamoDao.scan(
+      dynamoDbDocumentClient,
+      {
+        TableName: uitesterTableName,
+        FilterExpression: "begins_with(Id, :result_sets_prefix)",
+        ExpressionAttributeValues: {
+          ":result_sets_prefix": "get-test-"
+        }
+      }
+    );
+    console.log(response);
+    expect(response).toEqual(
+      {
+        Items: [ { Id: 'get-test-object-2' }, { Id: 'get-test-object-1' } ],
+        Count: 2,
+        ScannedCount: 3
+      }
+    );
   });
 
   test('dynamoDao getResultSetId test', async () => {
@@ -93,4 +131,12 @@ async function createTestTable() {
 async function deleteTestTable() {
   const tableParams = { TableName: uitesterTableName }
   await dynamoDB.deleteTable(tableParams).promise();
+}
+
+async function deleteColumn(id) {
+  const deleteParams = { 
+    TableName: uitesterTableName,
+    Key:{ Id: id }
+  }
+  await dynamoDbDocumentClient.delete(deleteParams).promise();
 }
