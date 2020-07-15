@@ -21,6 +21,23 @@ Parameters:
     Default: local
 
 Resources:
+  # ResultSetの一覧取得
+  GetResultSetListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/projects/GetResultSetListFunction/
+      Handler: index.lambda_handler
+      Runtime: nodejs12.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UITesterDynamoDB
+      Events:
+        RestPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UITesterApi
+            Path: /projects
+            Method: get
   ScreenshotProcessQueingFunction:
     Type: AWS::Serverless::Function
     Properties:
