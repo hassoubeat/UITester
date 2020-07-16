@@ -25,7 +25,7 @@ Resources:
   GetResultSetListFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/projects/GetResultSetListFunction/
+      CodeUri: lambda/GetResultSetListFunction/
       Handler: index.lambda_handler
       Runtime: nodejs12.x
       Policies:
@@ -36,7 +36,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref UITesterApi
-            Path: /projects
+            Path: /result-sets
             Method: get
   # Resultの一覧取得
   GetResultListFunction:
@@ -273,7 +273,7 @@ Resources:
 Outputs:
   GetResultSetListFunction:
     Description: "Access Command"
-    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/"
+    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/"
   GetResultListFunction:
     Description: "Access Command"
     Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{resultSetId}/results/"
