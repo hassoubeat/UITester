@@ -38,6 +38,23 @@ Resources:
             RestApiId: !Ref UITesterApi
             Path: /projects
             Method: get
+  # Resultの一覧取得
+  GetResultListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/GetResultListFunction/
+      Handler: index.lambda_handler
+      Runtime: nodejs12.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UITesterDynamoDB
+      Events:
+        RestPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UITesterApi
+            Path: /result-sets/{resultSetId}/results
+            Method: get
   ScreenshotProcessQueingFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -257,6 +274,9 @@ Outputs:
   GetResultSetListFunction:
     Description: "Access Command"
     Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/"
+  GetResultListFunction:
+    Description: "Access Command"
+    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{resultSetId}/results/"
   ScreenshotProcessQueingFunction:
     Description: "Access Command"
     Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/screenshot-queing"
