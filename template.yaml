@@ -25,7 +25,7 @@ Resources:
   GetResultSetListFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/projects/GetResultSetListFunction/
+      CodeUri: lambda/GetResultSetListFunction/
       Handler: index.lambda_handler
       Runtime: nodejs12.x
       Policies:
