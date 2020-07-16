@@ -30,9 +30,36 @@ describe('DynamoDB Dao Success Group', () => {
       TableName: uitesterTableName,
       Item: { Id: "other-test-object-1" }
     }
+    const testObj4 = {
+      TableName: uitesterTableName,
+      Item: { 
+        Id: "query-test-object-1",
+        ResultSetId: "Result-Set-1",
+        ResultName: "TOP画面"
+      }
+    }
+    const testObj5 = {
+      TableName: uitesterTableName,
+      Item: { 
+        Id: "query-test-object-2",
+        ResultSetId: "Result-Set-2",
+        ResultName: "TOP画面"
+      }
+    }
+    const testObj6 = {
+      TableName: uitesterTableName,
+      Item: { 
+        Id: "query-test-object-3",
+        ResultSetId: "Result-Set-2",
+        ResultName: "詳細画面"
+      }
+    }
     await dynamoDbDocumentClient.put(testObj1).promise();
     await dynamoDbDocumentClient.put(testObj2).promise();
     await dynamoDbDocumentClient.put(testObj3).promise();
+    await dynamoDbDocumentClient.put(testObj4).promise();
+    await dynamoDbDocumentClient.put(testObj5).promise();
+    await dynamoDbDocumentClient.put(testObj6).promise();
   });
 
   // beforeEach( async () => {
@@ -72,12 +99,37 @@ describe('DynamoDB Dao Success Group', () => {
         }
       }
     );
-    console.log(response);
     expect(response).toEqual(
       {
         Items: [ { Id: 'get-test-object-2' }, { Id: 'get-test-object-1' } ],
         Count: 2,
-        ScannedCount: 3
+        ScannedCount: 6
+      }
+    );
+  });
+
+  // データ検索(query)のテスト
+  test('dynamoDao query test', async () => {
+    console.log('dynamoDao query test');
+    const response = await dynamoDao.query(
+      dynamoDbDocumentClient,
+      {
+        TableName: uitesterTableName,
+        IndexName: "ResultSearchIndex",
+        KeyConditionExpression: "ResultSetId=:resultSetId",
+        ExpressionAttributeValues: {
+          ":resultSetId": "Result-Set-2"
+        }
+      }
+    );
+    expect(response).toEqual(
+      {
+        Items: [ 
+          { ResultName: 'TOP画面', ResultSetId: 'Result-Set-2', Id: 'query-test-object-2' },
+          { ResultName: '詳細画面', ResultSetId: 'Result-Set-2', Id: 'query-test-object-3' }
+        ],
+        Count: 2,
+        ScannedCount: 2
       }
     );
   });
