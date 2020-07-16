@@ -1,16 +1,14 @@
-const AWS = require('aws-sdk');
 const dynamoDbDao = require('dynamodb-dao');
 
 // 環境変数の設定
 process.env.UITESTER_DYNAMODB_TABLE_NAME = "dummy"
 
 const getResultSetListFunction = require("./index");
-const { ManagedBlockchain } = require('aws-sdk');
 
 // jestのマニュアルモック利用
 jest.mock('dynamodb-dao');
 
-describe('ScreenshotProcessQueingFunction Success Group', () => {
+describe('GetResultSetListFunction Success Group', () => {
 
   // beforeAll( async () => {
   //   console.log("beforeAll");
