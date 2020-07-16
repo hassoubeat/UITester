@@ -53,7 +53,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref UITesterApi
-            Path: /result-sets/{projectId}/results
+            Path: /result-sets/{resultSetId}/results
             Method: get
   ScreenshotProcessQueingFunction:
     Type: AWS::Serverless::Function
@@ -276,7 +276,7 @@ Outputs:
     Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/"
   GetResultListFunction:
     Description: "Access Command"
-    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{projectId}/results/"
+    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{resultSetId}/results/"
   ScreenshotProcessQueingFunction:
     Description: "Access Command"
     Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/screenshot-queing"
