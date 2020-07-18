@@ -64,6 +64,8 @@ exports.lambda_handler = async (event, context) => {
         Type: 'SCREENSHOT_DIFF', 
         ResultName: originResult.ResultName,
         Progress: '未処理',
+        OriginS3ObjectKey: originResult.S3ObjectKey,
+        TargetS3ObjectKey: targetResult.S3ObjectKey,
         ResultSetId: resultSetId
       }
     }
