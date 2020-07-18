@@ -8,14 +8,59 @@ const columnify = require('columnify');
 const UITESTER_DYNAMODB_TABLE_NAME = process.env.UITESTER_DYNAMODB_TABLE_NAME;
 
 exports.lambda_handler = async (event, context) => {
+  try {
+    const resultSetId = event.pathParameters.resultSetId;
+    const queryResult = await dynamodbDao.query(
+      dynamoDB,
+      {
+        TableName: UITESTER_DYNAMODB_TABLE_NAME,
+        IndexName: "ResultSearchIndex",
+        KeyConditionExpression: "ResultSetId=:resultSetId",
+        ExpressionAttributeValues: {
+          ":resultSetId": resultSetId
+        }
+      }
+    );
 
-  const report = outputHtmlReport();
+    const REPORT_TYPE = event.pathParameters.reportType;
+    const CONSOLE_REPORT = "console";
+    const HTML_REPORT = "html";
 
-  var response = {
-    'statusCode': 200,
-    'body': report
+    const reportObj = {
+      report : "",
+      contentType : ""
+    };
+
+    switch (REPORT_TYPE) {
+      case CONSOLE_REPORT:
+        reportObj.report = outputConsoleReport(queryResult.Items);
+        reportObj.contentType = "text/plain";
+        break;
+      case HTML_REPORT:
+        reportObj.report = outputHtmlReport(queryResult.Items);
+        reportObj.contentType = "text/html";
+        break;
+      default:
+        throw new Error('Please specify the correct report type');
+    }
+
+    let response = {
+      'statusCode': 200,
+      'headers': {
+        "content-type" : reportObj.contentType
+      },
+      'body': reportObj.report
+    }
+    return response
+
+  } catch (error) {
+    console.error(error);
+    let response = {
+      'statusCode': 500,
+      'body': error.message
+    }
+    return response
   }
-  return response
 }
 
 // コンソールレポートの出力処理
