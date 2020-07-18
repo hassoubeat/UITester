@@ -8,6 +8,7 @@
   "dependencies": {
     "aws-sdk": "^2.711.0",
     "aws-sdk-mock": "^5.1.0",
+    "columnify": "^1.5.4",
     "dedent-js": "^1.0.1",
     "jest": "^26.1.0"
   }
