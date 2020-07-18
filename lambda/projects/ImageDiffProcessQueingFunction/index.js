@@ -45,7 +45,9 @@ exports.lambda_handler = async (event, context) => {
       Item: {
         Id: resultSetId,
         Type: 'SCREENSHOT_DIFF', 
-        ResultSetName: `${payload.originResultSetId}-diff-${payload.targetResultSetId}`
+        ResultSetName: `${payload.originResultSetId}-diff-${payload.targetResultSetId}`,
+        OriginResultSetId: payload.originResultSetId,
+        TargetResultSetId: payload.targetResultSetId
       }
     }
   );
@@ -64,6 +66,8 @@ exports.lambda_handler = async (event, context) => {
         Type: 'SCREENSHOT_DIFF', 
         ResultName: originResult.ResultName,
         Progress: '未処理',
+        OriginS3ObjectKey: originResult.S3ObjectKey,
+        TargetS3ObjectKey: targetResult.S3ObjectKey,
         ResultSetId: resultSetId
       }
     }
