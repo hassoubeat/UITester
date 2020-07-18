@@ -73,7 +73,7 @@ function outputConsoleReport(resultList) {
 }
 exports.outputConsoleReport = outputConsoleReport;
 
-// HTMLレポートの出力処理
+// TODO HTMLレポートの出力処理 (まだMock)
 function outputHtmlReport() {
   return dedent`
   <!DOCTYPE html>
