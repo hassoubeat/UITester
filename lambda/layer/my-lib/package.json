@@ -4,6 +4,7 @@
     "version": "0.0.1",
     "private": true,
     "dependencies": {
+        "dedent-js": "^1.0.1",
         "dynamodb-dao": "file:./dynamodb-dao"
     },
     "scripts": {}
