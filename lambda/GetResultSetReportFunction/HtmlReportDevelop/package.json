@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "main": "gulpfile.js",
+  "scripts": {
+    "server": "gulp server"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "browser-sync": "^2.26.7",
+    "gulp": "^4.0.2"
+  }
+}
