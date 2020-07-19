@@ -68,16 +68,11 @@ exports.lambda_handler = async (event, context) => {
       Key: {
         Id : diffPayload.resultId
       },
-      UpdateExpression: "Set Progress=:progress, S3ObjectKey=:s3ObjectKey, DiffResultDetail=:diffResultDetail",
+      UpdateExpression: "Set Progress=:progress, S3ObjectKey=:s3ObjectKey, DiffMisMatchRate=:diffMisMatchRate",
       ExpressionAttributeValues: {
         ":progress": "処理済",
         ":s3ObjectKey": s3PutParams.Key,
-        ":diffResultDetail": JSON.stringify({
-          isSameDimensions: diffData.isSameDimensions,
-          dimensionDifference: diffData.dimensionDifference,
-          misMatchPercentage: diffData.misMatchPercentage,
-          analysisTime: diffData.analysisTime
-        })
+        ":diffMisMatchRate": diffData.misMatchPercentage
       }
     }
   );
