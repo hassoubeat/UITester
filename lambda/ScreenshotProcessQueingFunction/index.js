@@ -4,7 +4,7 @@ const dynamodbDao = require('dynamodb-dao');
 const SQS_QUEUE_URL = process.env.SCREENSHOT_PROCESS_SQS;
 const UITESTER_DYNAMODB_TABLE_NAME = process.env.UITESTER_DYNAMODB_TABLE_NAME;
 
-exports.lambda_handler = async ({event, context}) => {
+exports.lambda_handler = async (event, context) => {
   const sqs = new AWS.SQS({apiVersion: '2012-11-05'});
   const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
@@ -21,14 +21,14 @@ exports.lambda_handler = async ({event, context}) => {
       Item: {
         Id: resultSetId,
         Type: 'SCREENSHOT',
-        ProjectName: payload.project.projectName
+        ResultSetName: payload.resultSet.resultSetName
       }
     }
   );
 
   result[resultSetId] = {};
 
-  for(const action of payload.project.actions) {
+  for(const action of payload.resultSet.actions) {
     try {
       const resultId = `Result-${await dynamodbDao.getResultId(dynamoDB, UITESTER_DYNAMODB_TABLE_NAME)}`;
       // DynamoDBにメタデータ(Result)の登録
