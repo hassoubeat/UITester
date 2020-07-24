@@ -1,11 +1,11 @@
 const AWS = require('aws-sdk');
-const resemble = require('node-resemble-js');
-
 const S3 = new AWS.S3();
-const fs = require('fs');
-const SAVE_BUCKET_NAME = process.env['S3_BUCKET_NAME'];
 
+const fs = require('fs');
+const resemble = require('node-resemble-js');
 const dynamodbDao = require('dynamodb-dao');
+
+const UITESTER_S3_BUCKET_NAME = process.env.UITESTER_S3_BUCKET_NAME;
 const UITESTER_DYNAMODB_TABLE_NAME = process.env['UITESTER_DYNAMODB_TABLE_NAME'];
 
 // 差分比較
@@ -37,11 +37,11 @@ exports.lambda_handler = async (event, context) => {
 
   // S3から比較対象ファイルの取得
   const originImage = await S3.getObject({
-    Bucket: SAVE_BUCKET_NAME,
+    Bucket: UITESTER_S3_BUCKET_NAME,
     Key: diffPayload.originS3ObjectKey
   }).promise();
   const targetImage = await S3.getObject({
-    Bucket: SAVE_BUCKET_NAME,
+    Bucket: UITESTER_S3_BUCKET_NAME,
     Key: diffPayload.targetS3ObjectKey
   }).promise();
 
@@ -53,7 +53,7 @@ exports.lambda_handler = async (event, context) => {
 
   // S3に差分結果をアップロード
   const s3PutParams = {
-    Bucket: SAVE_BUCKET_NAME,
+    Bucket: UITESTER_S3_BUCKET_NAME,
     Key: `result/${diffPayload.resultSetId}/${diffPayload.resultName}.png`,
     Body: diffFileContent,
     ContentType: 'image/png'
