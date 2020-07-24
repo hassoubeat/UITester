@@ -55,6 +55,26 @@ Resources:
             RestApiId: !Ref UITesterApi
             Path: /result-sets/{resultSetId}/results
             Method: get
+  # ResultSetのレポート取得処理
+  GetResultSetReportFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/GetResultSetReportFunction/
+      Handler: index.lambda_handler
+      Runtime: nodejs12.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UITesterDynamoDB
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !Ref UITesterS3
+      Events:
+        RestPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UITesterApi
+            Path: /result-sets/{resultSetId}/report/{reportType}
+            Method: get
   ScreenshotProcessQueingFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -277,6 +297,9 @@ Outputs:
   GetResultListFunction:
     Description: "Access Command"
     Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{resultSetId}/results/"
+  GetResultSetReportFunction:
+    Description: "Access Command"
+    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{resultSetId}/report/{reportType = (html)}"
   ScreenshotProcessQueingFunction:
     Description: "Access Command"
     Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/screenshot-queing"

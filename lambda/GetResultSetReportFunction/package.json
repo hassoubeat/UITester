@@ -3,10 +3,7 @@
     "description": "replaced-by-user-input",
     "version": "0.0.1",
     "private": true,
-    "dependencies": {
-        "columnify": "^1.5.4",
-        "dedent-js": "^1.0.1",
-        "dynamodb-dao": "file:./dynamodb-dao"
-    },
+    "dependencies": {},
+    "devDependencies": {},
     "scripts": {}
 }
