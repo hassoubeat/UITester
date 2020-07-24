@@ -10,6 +10,7 @@ Globals:
     Environment:
       Variables:
         UITESTER_DYNAMODB_TABLE_NAME: !Ref UITesterDynamoDB
+        UITESTER_S3_BUCKET_NAME: !Ref UITesterS3
 
 Parameters:
   Env: # prod: 本番環境、stg: 検品環境、 local: ローカル開発環境
@@ -65,9 +66,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref UITesterDynamoDB
-      Environment:
-        Variables:
-          S3_BUCKET_NAME: !Ref UITesterS3
       Events:
         RestPost:
           Type: Api
@@ -114,9 +112,6 @@ Resources:
             TableName: !Ref UITesterDynamoDB
         - S3CrudPolicy:
             BucketName: !Ref UITesterS3
-      Environment:
-        Variables:
-          S3_BUCKET_NAME: !Ref UITesterS3
       Events:
         SQSQueueEvent:
           Type: SQS
@@ -162,9 +157,6 @@ Resources:
            TableName: !Ref UITesterDynamoDB
         - S3CrudPolicy:
             BucketName: !Ref UITesterS3
-      Environment:
-        Variables:
-          S3_BUCKET_NAME: !Ref UITesterS3
       Events:
         SQSQueueEvent:
           Type: SQS
