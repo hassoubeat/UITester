@@ -17,6 +17,9 @@
       .align-top {
         vertical-align: top;
       }
+      .gridjs-sort {
+        border: none;
+      }
     </style>
   </head>
   <body>
@@ -52,6 +55,7 @@
         columns: ['ID', 'Name', 'Email',
           {
             name: 'Diff',
+            sort: false,
             formatter: (diffObj) => gridjs.html(`<center><button class='btn btn-primary' onclick='showScreenshotDiff("${diffObj.origin}", "${diffObj.target}", "${diffObj.diffResult}")' >Diff Button</button></center>`)
           }
         ],
@@ -71,7 +75,8 @@
             }
           ],
           [3, 'Eoin', 'eoin@gmail.com']
-        ] 
+        ],
+        sort: true
       }).render(document.getElementById('result'));
 
       var screenshotDiffGrid = new gridjs.Grid({
