@@ -76,7 +76,7 @@ describe('DynamoDB Dao Success Group', () => {
         Item: {
           Id: resultSetId,
           Type: 'SCREENSHOT',
-          ProjectName: "Project-1"
+          ResultSetName: "Result-Set-1"
         }
       }
     );
