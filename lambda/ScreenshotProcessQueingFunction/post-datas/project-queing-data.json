@@ -1,7 +1,6 @@
 {
-  "project": {
-    "projectNameId": "Project-1",
-    "projectName": "プロジェクト1",
+  "resultSet": {
+    "resultSetName": "プロジェクト1",
     "actions": [
       {
         "actionId":"Action-1",
