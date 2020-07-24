@@ -6,11 +6,11 @@ const chromium = require('chrome-aws-lambda');
 const puppeteer = chromium.puppeteer;
 
 const S3 = new AWS.S3();
-const SAVE_BUCKET_NAME = process.env['S3_BUCKET_NAME']
+const UITESTER_S3_BUCKET_NAME = process.env.UITESTER_S3_BUCKET_NAME;
 
 const dynamodbDao = require('dynamodb-dao');
 const dynamoDbDocumentClient = new AWS.DynamoDB.DocumentClient();
-const UITESTER_DYNAMODB_TABLE_NAME = process.env['UITESTER_DYNAMODB_TABLE_NAME'];
+const UITESTER_DYNAMODB_TABLE_NAME = process.env.UITESTER_DYNAMODB_TABLE_NAME;
 
 // メイン処理
 exports.lambda_handler = async (event, context) => {
@@ -42,7 +42,7 @@ exports.lambda_handler = async (event, context) => {
     
     // S3にスクリーンショット保存
     const s3PutParams = {
-      Bucket: SAVE_BUCKET_NAME,
+      Bucket: UITESTER_S3_BUCKET_NAME,
       Key: `result/${action.resultSetId}/${action.actionName}.png`,
       Body: screenshot,
       ContentType: 'image/png'

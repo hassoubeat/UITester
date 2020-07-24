@@ -5,7 +5,7 @@ const dynamodbDao = require('dynamodb-dao');
 const dedent = require('dedent-js');
 const columnify = require('columnify');
 
-const UITESTER_S3_BUCKET_NAME = process.env.S3_BUCKET_NAME;
+const UITESTER_S3_BUCKET_NAME = process.env.UITESTER_S3_BUCKET_NAME;
 const UITESTER_DYNAMODB_TABLE_NAME = process.env.UITESTER_DYNAMODB_TABLE_NAME;
 
 exports.lambda_handler = async (event, context) => {

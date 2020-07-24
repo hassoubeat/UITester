@@ -3,7 +3,7 @@ const dynamoDbDao = require('dynamodb-dao');
 const dedent = require('dedent-js');
 
 // 環境変数の設定
-process.env.S3_BUCKET_NAME = "dummy"
+process.env.UITESTER_S3_BUCKET_NAME = "dummy"
 process.env.UITESTER_DYNAMODB_TABLE_NAME = "dummy"
 
 
