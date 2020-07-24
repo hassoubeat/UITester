@@ -75,10 +75,11 @@ Resources:
             RestApiId: !Ref UITesterApi
             Path: /result-sets/{resultSetId}/report/{reportType}
             Method: get
+  # スクリーンショット取得処理のキューイング処理
   ScreenshotProcessQueingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/projects/ScreenshotProcessQueingFunction/
+      CodeUri: lambda/ScreenshotProcessQueingFunction/
       Handler: index.lambda_handler
       Runtime: nodejs12.x
       Policies:
@@ -95,12 +96,13 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref UITesterApi
-            Path: /projects/screenshot-queing
+            Path: /result-sets/screenshot-queing
             Method: post
+  # スクリーンショット取得処理
   ScreenshotProcessFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/projects/ScreenshotProcessFunction/
+      CodeUri: lambda/ScreenshotProcessFunction/
       Handler: index.lambda_handler
       Runtime: nodejs12.x
       Layers:
@@ -121,10 +123,11 @@ Resources:
           Properties:
             Queue: !GetAtt ScreenshotProcessSQS.Arn
             BatchSize: 1
+  # 画像差分取得処理のキューイング処理
   ImageDiffProcessQueingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/projects/ImageDiffProcessQueingFunction/
+      CodeUri: lambda/ImageDiffProcessQueingFunction/
       Handler: index.lambda_handler
       Runtime: nodejs12.x
       Policies:
@@ -141,12 +144,13 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref UITesterApi
-            Path: /projects/imagediff-queing
+            Path: /result-sets/imagediff-queing
             Method: post
+  # 画像差分取得処理
   ImageDiffProcessFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/projects/ImageDiffProcessFunction/
+      CodeUri: lambda/ImageDiffProcessFunction/
       Handler: index.lambda_handler
       Runtime: nodejs12.x
       Layers:
@@ -168,6 +172,7 @@ Resources:
             Queue: !GetAtt ImageDiffProcessSQS.Arn
             BatchSize: 1
 
+  # Puppeteer(chrome-aws-lambda)の関連ライブラリのレイヤー
   PupperteerLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -176,6 +181,7 @@ Resources:
         - nodejs12.x
     Metadata:
       BuildMethod: nodejs12.x
+  # NodeResembleJS(画像比較ライブラリ)のレイヤー
   NodeResembleJSLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -184,6 +190,7 @@ Resources:
         - nodejs12.x
     Metadata:
       BuildMethod: nodejs12.x
+  # 自前で実装した共通ライブラリのレイヤー
   MyLibLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -198,6 +205,7 @@ Resources:
     Properties:
       StageName: !Ref Env
 
+  # スクリーンショット取得処理のキュー
   ScreenshotProcessSQS:
     Type: AWS::SQS::Queue
     Properties:
@@ -209,6 +217,7 @@ Resources:
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt ScreenshotProcessDLQ.Arn
         maxReceiveCount: 1
+  # スクリーンショット取得処理のデッドレターキュー
   ScreenshotProcessDLQ:
     Type: AWS::SQS::Queue
     Properties:
@@ -216,6 +225,7 @@ Resources:
       VisibilityTimeout: 30
       # メッセージをキューに貯めておく期間
       MessageRetentionPeriod: 86400
+  # 画像差分比較処理のキュー
   ImageDiffProcessSQS:
     Type: AWS::SQS::Queue
     Properties:
@@ -227,6 +237,7 @@ Resources:
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt ImageDiffProcessDLQ.Arn
         maxReceiveCount: 1
+  # 画像差分比較処理のデッドレターキュー
   ImageDiffProcessDLQ:
     Type: AWS::SQS::Queue
     Properties:
@@ -235,6 +246,7 @@ Resources:
       # メッセージをキューに貯めておく期間
       MessageRetentionPeriod: 86400
 
+  # 本アプリで利用するS3バケット
   UITesterS3:
     Type: "AWS::S3::Bucket"
     Properties:
@@ -252,6 +264,7 @@ Resources:
             Principal: "*"
             Resource: !Sub arn:aws:s3:::${UITesterS3}/*
 
+  # 本アプリで利用するDynamoDB
   UITesterDynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -302,10 +315,10 @@ Outputs:
     Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{resultSetId}/report/{reportType = (html)}"
   ScreenshotProcessQueingFunction:
     Description: "Access Command"
-    Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/screenshot-queing"
+    Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/screenshot-queing"
   ImageDiffProcessQueingApi:
     Description: "Access Command"
-    Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/projects/imagediff-queing"
+    Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/imagediff-queing"
   ScreenshotProcessSQS:
     Description: "ScreenshotProcessSQS PATH"
     Value: !Sub "${ScreenshotProcessSQS}"
