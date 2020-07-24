@@ -17,7 +17,7 @@ exports.lambda_handler = async (event, context) => {
   try {
     var action = JSON.parse(event['Records'][0]['body']);
 
-    // Pupperteer初期処理
+    // Puppeteer初期処理
     var browser = await puppeteer.launch({
       args: chromium.args.concat(['--lang=ja']),
       defaultViewport: chromium.defaultViewport,
@@ -29,11 +29,11 @@ exports.lambda_handler = async (event, context) => {
       'Accept-Language': 'ja-JP'
     });
 
-    // Pupperteerのブラウザの詳細設定を実行
+    // Puppeteerのブラウザの詳細設定を実行
     page = await browserSetting(page, action.browserSettings);
 
     for(let actionProcess of action.actionProcesies) {
-      // Pupperteerのブラウザを操作
+      // Puppeteerのブラウザを操作
       await browserAction(page, actionProcess);
     };
     
