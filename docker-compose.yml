@@ -1,0 +1,33 @@
+version: '3'
+services:
+  # Node.jsコンテナ
+  UITester_nodejs_container:    
+    container_name: 'UITester_nodejs_container'
+    image: node:12
+    working_dir: /docker_share_dir
+    volumes:
+      - ./:/docker_share_dir
+    command: bash -c "npm install && npm run server"
+    ports:
+     # WebServer用ポート
+     - 8200:8200
+     # LiveReload用ポート
+     - 35729:35729
+    environment:
+     - DEV_HOST=0.0.0.0
+     - DEV_PORT=8200
+     - REST_API_DOMAIN=
+    tty: true
+  # ユニットテスト用のlocalstackコンテナ
+  UITester_localstack:
+    container_name: UITester_localstack
+    image: "localstack/localstack"
+    ports:
+      - "4566:4566"
+      - "${PORT_WEB_UI:-8080}:8080"
+    environment:
+      - PORT_WEB_UI=8080
+      - SERVICES=s3,dynamodb,sqs
+      - DEFAULT_REGION=ap-northeast-1
+      - DATA_DIR=/tmp/localstack/data
+      - TMPDIR=/private${TMPDIR- }
