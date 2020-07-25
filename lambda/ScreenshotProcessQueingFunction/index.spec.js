@@ -5,8 +5,6 @@ process.env.UITESTER_SQS_QUEUE_NAME = "dummy"
 process.env.SCREENSHOT_PROCESS_SQS = `dummy`
 process.env.UITESTER_DYNAMODB_TABLE_NAME = "dummy"
 
-const screenshotProcessQueing = require("./index");
-
 // jestのマニュアルモック
 jest.mock('dynamodb-dao');
 
@@ -23,6 +21,8 @@ AWS.SQS = jest.fn(() => {
     }),
   };
 });
+
+const screenshotProcessQueing = require("./index");
 
 describe('ScreenshotProcessQueingFunction Success Group', () => {
 
