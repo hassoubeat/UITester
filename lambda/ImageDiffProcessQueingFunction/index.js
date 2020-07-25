@@ -52,7 +52,7 @@ exports.lambda_handler = async (event, context) => {
     }
   );
 
-  result[resultSetId] = {};
+  result.results = [];
 
   for(const originResult of originResultList.Items) {
     // 比較対象配列の中に同じResultNameを持つデータ(比較対象)が存在するかをチェック
@@ -98,7 +98,7 @@ exports.lambda_handler = async (event, context) => {
       }).promise();
     }
 
-    result[resultSetId][resultId] = putObject.Item;
+    result.results.push(putObject.Item);
   }
 
   console.log(result);
