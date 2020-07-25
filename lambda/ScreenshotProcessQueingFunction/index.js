@@ -26,7 +26,7 @@ exports.lambda_handler = async (event, context) => {
     }
   );
 
-  result[resultSetId] = {};
+  result.results = [];
 
   for(const action of payload.resultSet.actions) {
     try {
@@ -54,10 +54,10 @@ exports.lambda_handler = async (event, context) => {
         QueueUrl: SQS_QUEUE_URL,
       }).promise();
 
-      result[resultSetId][action.actionId] = putObject.Item;
+      result.results.push(putObject.Item);
 
     } catch (error) {
-      result[resultSetId][action.actionId] = error.message;
+      result.results.push(error.message);
     }
   }
 

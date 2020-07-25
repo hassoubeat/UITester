@@ -41,22 +41,22 @@ describe('ScreenshotProcessQueingFunction Success Group', () => {
     const event = {body: JSON.stringify(inputData)};
     const response = await screenshotProcessQueing.lambda_handler(event, {});
     expect(JSON.parse(response.body).message).toEqual({
-      "Result-Set-1": {
-          "Action-1": {
-              "Id": "Result-1",
-              "Progress": "未処理",
-              "ResultName": "iPhone 6(横)",
-              "ResultSetId": "Result-Set-1",
-              "Type": "SCREENSHOT"
-          },
-          "Action-2": {
-              "Id": "Result-1",
-              "Progress": "未処理",
-              "ResultName": "iPhone 6(縦)",
-              "ResultSetId": "Result-Set-1",
-              "Type": "SCREENSHOT"
-          }
-      }
+      results: [
+        {
+          Id: 'Result-1',
+          Type: 'SCREENSHOT',
+          ResultName: 'iPhone 6(横)',
+          Progress: '未処理',
+          ResultSetId: 'Result-Set-1'
+        },
+        {
+          Id: 'Result-1',
+          Type: 'SCREENSHOT',
+          ResultName: 'iPhone 6(縦)',
+          Progress: '未処理',
+          ResultSetId: 'Result-Set-1'
+        }
+      ]
     });
   });
 
