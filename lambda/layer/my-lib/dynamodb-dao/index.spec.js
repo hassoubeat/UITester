@@ -1,5 +1,3 @@
-const dynamoDao = require("./index");
-
 const AWS = require('aws-sdk');
 const config = {
   region: "ap-northeast-1",
@@ -9,6 +7,8 @@ const config = {
 const dynamoDB = new AWS.DynamoDB(config);
 const dynamoDbDocumentClient = new AWS.DynamoDB.DocumentClient(config);
 const uitesterTableName = "local-uitester";
+
+const dynamoDao = require("./index");
 
 describe('DynamoDB Dao Success Group', () => {
 
@@ -68,6 +68,10 @@ describe('DynamoDB Dao Success Group', () => {
   // データ投入(put)のテスト
   test('dynamoDao put test', async () => {
     console.log("dynamoDao put test");
+
+    // 日付取得処理を固定
+    dynamoDao.lib.getNowTime = jest.fn(() => new Date("2020/1/1 13:59:59"));
+
     const resultSetId = "Result-Set-1";
     const response = await dynamoDao.put(
       dynamoDbDocumentClient,
@@ -82,7 +86,18 @@ describe('DynamoDB Dao Success Group', () => {
     );
     expect(response).toEqual({"ConsumedCapacity":{"TableName":uitesterTableName,"CapacityUnits":1}});
 
-    // 後始末
+    // 投入されたデータを取得して期待通りの値になっているかチェック
+    checkPutObj = await getColumn(resultSetId);
+    console.log(checkPutObj);
+    expect(checkPutObj.Item).toEqual({
+      Id: resultSetId,
+      Type: 'SCREENSHOT',
+      ResultSetName: "Result-Set-1",
+      CreateDate: "2020/1/1 13:59:59",
+      UnixCreateDate: 1577854799000
+    });
+
+    // 投入したデータを削除
     await deleteColumn(resultSetId);
   });
 
@@ -134,12 +149,14 @@ describe('DynamoDB Dao Success Group', () => {
     );
   });
 
+  // ResultSetId(アトミックカウンター)取得処理のテスト
   test('dynamoDao getResultSetId test', async () => {
     console.log("dynamoDao getResultSetId test");
     const response = await dynamoDao.getResultSetId(dynamoDbDocumentClient, uitesterTableName);
     expect(response).toBe(1);
   });
 
+  // ResultId(アトミックカウンター)取得処理のテスト
   test('dynamoDao getResultId test', async () => {
     console.log("dynamoDao getResultId test");
     const response = await dynamoDao.getResultId(dynamoDbDocumentClient, uitesterTableName);
@@ -183,6 +200,14 @@ async function createTestTable() {
 async function deleteTestTable() {
   const tableParams = { TableName: uitesterTableName }
   await dynamoDB.deleteTable(tableParams).promise();
+}
+
+async function getColumn(id) {
+  const getParams = { 
+    TableName: uitesterTableName,
+    Key: { Id : id }
+  }
+  return await dynamoDbDocumentClient.get(getParams).promise();
 }
 
 async function deleteColumn(id) {
