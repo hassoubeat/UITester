@@ -11,6 +11,7 @@ Globals:
       Variables:
         UITESTER_DYNAMODB_TABLE_NAME: !Ref UITesterDynamoDB
         UITESTER_S3_BUCKET_NAME: !Ref UITesterS3
+        TZ: 'Asia/Tokyo'
 
 Parameters:
   Env: # prod: 本番環境、stg: 検品環境、 local: ローカル開発環境
