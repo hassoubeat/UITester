@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "server": "gulp server"
   },
   "license": "ISC",
   "dependencies": {
@@ -11,5 +11,9 @@
     "columnify": "^1.5.4",
     "dedent-js": "^1.0.1",
     "jest": "^26.1.0"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.26.10",
+    "gulp": "^4.0.2"
   }
 }
