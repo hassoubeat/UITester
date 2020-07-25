@@ -52,6 +52,8 @@ exports.lambda_handler = async (event, context) => {
     }
   );
 
+  result[resultSetId] = {};
+
   for(const originResult of originResultList.Items) {
     // 比較対象配列の中に同じResultNameを持つデータ(比較対象)が存在するかをチェック
     const targetResult = targetResultList.Items.find(targetResult => originResult.ResultName === targetResult.ResultName);
@@ -95,6 +97,8 @@ exports.lambda_handler = async (event, context) => {
         QueueUrl: SQS_QUEUE_URL,
       }).promise();
     }
+
+    result[resultSetId][resultId] = putObject.Item;
   }
 
   console.log(result);
@@ -103,7 +107,7 @@ exports.lambda_handler = async (event, context) => {
     response = {
       'statusCode': 200,
       'body': JSON.stringify({
-        message: diffQueingMessage,
+        message: result,
       })
     }
   } catch (err) {
