@@ -106,6 +106,11 @@ exports.lambda_handler = async (event, context) => {
   try {
     response = {
       'statusCode': 200,
+      'headers': {
+        "Access-Control-Allow-Headers" : "Content-Type",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS, POST"
+      },
       'body': JSON.stringify({
         message: result,
       })

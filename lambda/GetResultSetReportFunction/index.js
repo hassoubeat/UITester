@@ -48,7 +48,10 @@ exports.lambda_handler = async (event, context) => {
     let response = {
       'statusCode': 200,
       'headers': {
-        "content-type" : reportObj.contentType
+        "content-type" : reportObj.contentType,
+        "Access-Control-Allow-Headers" : "Content-Type",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS, GET"
       },
       'body': reportObj.report
     }

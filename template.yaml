@@ -197,6 +197,8 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: !Ref Env
+      Cors:
+        AllowOrigin: "'*'"
 
   # スクリーンショット取得処理のキュー
   ScreenshotProcessSQS:
