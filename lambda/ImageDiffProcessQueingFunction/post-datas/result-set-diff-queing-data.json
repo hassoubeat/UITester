@@ -1,4 +1,5 @@
 {
+  "resultSetName": "差分チェック",
   "originResultSetId": "Result-Set-1",
-  "targetResultSetId": "Result-Set-35"
+  "targetResultSetId": "Result-Set-2"
 }

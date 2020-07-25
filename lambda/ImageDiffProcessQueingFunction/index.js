@@ -45,7 +45,7 @@ exports.lambda_handler = async (event, context) => {
       Item: {
         Id: resultSetId,
         Type: 'SCREENSHOT_DIFF', 
-        ResultSetName: `${payload.originResultSetId}-diff-${payload.targetResultSetId}`,
+        ResultSetName: payload.resultSetName,
         OriginResultSetId: payload.originResultSetId,
         TargetResultSetId: payload.targetResultSetId
       }
