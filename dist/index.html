@@ -27,9 +27,107 @@
     <header>
       <nav class="navbar navbar-expand-lg navbar-default navbar-fixed-top navbar-shrink">
         <a class="navbar-brand" href="/">UITester</a>
+        <!-- 左寄せナビゲーション -->
+        <ul class="navbar-nav mr-auto">
+        </ul>
+        <!-- 右寄せナビゲーション -->
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="#screenshotQueingModal" data-toggle="modal">ScreenshotQueing</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#imageDiffQueingModal" data-toggle="modal">ImageDiffQueing</a>
+          </li>
+        </ul>
       </nav>
     </header>
     <div id="resultSetList"></div>
+
+    <!-- ScreenshotQueingModal -->
+    <div class="modal fade" id="screenshotQueingModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+          <div class="modal-body text-muted">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">ScreenshotQueing</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <h5>Input ScreenshotQueing event name</h5>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon3">Event Name</span>
+                </div>
+                <input type="text" id="screenshotQueingEventName" class="form-control" placeholder="e.g. example.com server update before test" aria-describedby="basic-addon3">
+              </div>
+              <h5>Choose ScreenshotQueing input JSON file</h5>
+              <div class="input-group">
+                <label class="input-group-btn">
+                  <span class="btn btn-primary">
+                    <i class="fa fa-file" aria-hidden="true"></i> Select JSON File  
+                    <input type="file" id="screenshotQueingInputJsonFile" style="display:none" accept=".json" >
+                  </span>
+                </label>
+                <input type="text" class="form-control" readonly="">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" id="screenshotQueingDataPostBtn" class="btn btn-success" data-dismiss="modal">DataPost</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ImageDiffQueingModal -->
+    <div class="modal fade" id="imageDiffQueingModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+          <div class="modal-body text-muted">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">ImageDiffQueing</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <h5>Input ImageDiffQueing event name</h5>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon3">Event Name</span>
+                </div>
+                <input type="text" id="imageDiffQueingEventName" class="form-control" placeholder="e.g. example.com server update before after diff" aria-describedby="basic-addon3">
+              </div>
+              <h5>Choose origin and target ResultSetId difference</h5>
+              <div class="input-group">
+                <div class="form-group">
+                  <label for="imageDiffQueingOriginResultSetId">Origin</label>
+                  <select id="imageDiffQueingOriginResultSetId" class="custom-select">
+                  </select>
+                </div>
+              </div>
+              <div class="input-group">
+                <div class="form-group">
+                  <label for="imageDiffQueingTargetResultSetId">Target</label>
+                  <select id="imageDiffQueingTargetResultSetId" class="custom-select">
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" id="imageDiffQueingDataPostBtn" class="btn btn-success" data-dismiss="modal">DataPost</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -41,14 +139,53 @@
       const REST_API_DOMAIN = "https://xxx";
       const ENV = "xxx";
 
-      $(async function(){
-        // ResultSet一覧取得
-        const resultSetList = await axios.get(`${REST_API_DOMAIN}/${ENV}/result-sets/`);
-        const sortedResultSetList = mapIdAscSort(resultSetList.data.message);
-        console.log(sortedResultSetList);
+      var resultSetListTable = new gridjs.Grid({
+        columns: [],
+        data: []
+      }).render(document.getElementById('resultSetList'));
+      var screenshotQueingInputData = {};
 
-        // 取得したResultSetをテーブル出力
-        new gridjs.Grid({
+      $(async function(){
+        // 各種イベントセッティング
+        screenshotQueingJsonLoadEventSetup();
+        screenshotQueingDataPostEventSetup();
+        imageDiffQueingDataPostEventSetup();
+
+        await updateResultSetList();
+      });
+
+      // ResultSet一覧アップデート
+      async function updateResultSetList() {
+        // ResultSet一覧取得
+        const sortedResultSetList = mapIdAscSort(await getResultSetList());
+
+        // ResultSetListテーブル更新
+        showResultSetListTable(sortedResultSetList);
+
+        // ImageDiffのセレクトボックス初期化
+        updateSelectBox('#imageDiffQueingOriginResultSetId', sortedResultSetList);
+        updateSelectBox('#imageDiffQueingTargetResultSetId', sortedResultSetList);
+      }
+
+      // ResultSet一覧取得
+      async function getResultSetList() {
+        const response = await axios.get(`${REST_API_DOMAIN}/${ENV}/result-sets/`);
+        return response.data.message;
+      }
+
+      // ScreenshotQueing処理
+      async function postScreenshotQueing(postData) {
+        const response = await axios.post(`${REST_API_DOMAIN}/${ENV}/result-sets/screenshot-queing`, postData);
+      }
+
+      // ImageDiffQueing処理
+      async function postImageDiffQueing(postData) {
+        const response = await axios.post(`${REST_API_DOMAIN}/${ENV}/result-sets/imagediff-queing`, postData);
+      }
+
+      // ResultSetテーブル表示
+      function showResultSetListTable(resultSetList) {
+        resultSetListTable.updateConfig({
           columns: [
             { id: 'Id',  name: 'ID'  },
             { id: 'Type',  name: 'Type' },
@@ -63,19 +200,131 @@
               formatter: (resultSetId) => gridjs.html(`<a href="${REST_API_DOMAIN}/${ENV}/result-sets/${resultSetId}/report/html" target="_blank">View Report</a>`)
             }
           ],
-          data: sortedResultSetList,
+          data: resultSetList,
           sort: true,
-          search: true
-        }).render(document.getElementById('resultSetList'));
-      });
+          search: true,
+          pagination: { limit: 50 }
+        }).forceRender(document.getElementById('resultSetList'));
+      }
+
+      // ImageDiff セレクトボックスの値更新
+      function updateSelectBox(id, resultSetList) {
+        // 選択肢(option)のクリア
+        $(`${id} > option`).remove();
+        // 選択肢(option)の追加
+        resultSetList.forEach(resultSet => {
+          $(id).append(`<option value="${resultSet.Id}">${resultSet.ResultSetName}(${resultSet.Id})</option>`);
+        });
+      }
+
+      // スクリーンショットキューイング設定JSONファイルの読み込みイベントの設定
+      function screenshotQueingJsonLoadEventSetup() {
+        // File選択時にファイル名を親要素のinput text要素に出力する
+        $('#screenshotQueingInputJsonFile').on('change', function (event) {
+          // ファイル名の取得 & テキスト領域に表示
+          var input = $(this),
+          numFiles = input.get(0).files ? input.get(0).files.length : 1,
+          label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+          input.parent().parent().next(':text').val(label);
+
+          // JSONファイルの読み込み
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            let resultMessage = {};
+            try {
+              screenshotQueingInputData = JSON.parse(event.target.result);
+              resultMessage = {
+                text : "Success JSON load.",
+                bgColor : '#228B22',
+                position : 'bottom-right'
+              }
+            } catch (error) {
+              console.error(error.message);
+              resultMessage = {
+                text : "Failed JSON load.",
+                bgColor : 'red',
+                position : 'bottom-right'
+              }
+            }
+            $.toast(resultMessage);
+            $("#screenshotQueingInputJsonFile").val('');
+          };
+          reader.readAsText(event.target.files[0]);
+        });
+      }
+
+      // スクリーンショットキューイングのPOSTイベントの設定
+      function screenshotQueingDataPostEventSetup() {
+        $('#screenshotQueingDataPostBtn').on('click', async function (event) {
+          let resultMessage = {};
+          try {
+            const screenshotQueingEventName = $('#screenshotQueingEventName').val();
+
+            // イベント名が入力されていた場合は上書き
+            if (screenshotQueingEventName) {
+              screenshotQueingInputData.resultSet.resultSetName = screenshotQueingEventName;
+            }
+
+            await postScreenshotQueing(screenshotQueingInputData);
+
+            await updateResultSetList();
+
+            resultMessage = {
+              text : "Success POST request.",
+              bgColor : '#228B22',
+              position : 'bottom-right'
+            }
+          } catch (error) {
+            console.error(error.message);
+            resultMessage = {
+              text : "Failed POST request.",
+              bgColor : 'red',
+              position : 'bottom-right'
+            }
+          }
+          $.toast(resultMessage);
+        });
+      }
+
+      // 画像差分キューイングのPOSTイベントの設定
+      function imageDiffQueingDataPostEventSetup() {
+        $('#imageDiffQueingDataPostBtn').on('click', async function (event) {
+          let resultMessage = {};
+          try {
+            postData = {};
+
+            postData.resultSetName = $("#imageDiffQueingEventName").val();
+            postData.originResultSetId = $("#imageDiffQueingOriginResultSetId").val();
+            postData.targetResultSetId = $("#imageDiffQueingTargetResultSetId").val();
+
+            await postImageDiffQueing(postData);
+
+            await updateResultSetList();
+
+            resultMessage = {
+              text : "Success POST request.",
+              bgColor : '#228B22',
+              position : 'bottom-right'
+            }
+          } catch (error) {
+            console.error(error.message);
+            resultMessage = {
+              text : "Failed POST request.",
+              bgColor : 'red',
+              position : 'bottom-right'
+            }
+          }
+          $.toast(resultMessage);
+        });
+      }
 
       // Map要素のIdの昇順でソートする
       function mapIdAscSort(mapList) {
         return mapList.sort((a, b) => {
           aId = Number(a.Id.split('-').slice(-1)[0]);
           bId = Number(b.Id.split('-').slice(-1)[0]);
-          if(aId < bId) return -1;
-          if(aId > bId) return 1;
+          if(aId < bId) return 1;
+          if(aId > bId) return -1;
           return 0;
         });
       }
