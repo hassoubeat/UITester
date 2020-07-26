@@ -65,6 +65,7 @@ exports.lambda_handler = async (event, context) => {
     
   } catch (error) {
     // エラー発生時、DynamoDBのステータス更新
+    console.error(error.message);
 
     // 保存後にDynamoDBのステータス更新
     await dynamodbDao.update(
@@ -94,8 +95,8 @@ async function browserSetting(page, browserSettings) {
     const device = puppeteer.devices[browserSettings.deviceType]; 
     await page.emulate(device);
   } else {
-    await page.setUserAgent(browserSettings.userAgent);
-    await page.setViewport(browserSettings.viewport);
+    if (browserSettings.userAgent) await page.setUserAgent(browserSettings.userAgent);
+    if (browserSettings.viewport) await page.setViewport(browserSettings.viewport);
   }
   return page;
 }
@@ -114,6 +115,9 @@ async function browserAction(page, actionProcess) {
   switch (actionProcess.processType) {
     case GOTO: {
       console.log('switch ' + GOTO);
+      if (actionProcess.basicAuth) {
+        await page.authenticate(actionProcess.basicAuth);
+      }
       await page.goto(actionProcess.url);
       break;
     }
