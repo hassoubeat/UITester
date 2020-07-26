@@ -45,14 +45,21 @@ describe('ScreenshotProcessQueingFunction Success Group', () => {
         {
           Id: 'Result-1',
           Type: 'SCREENSHOT',
-          ResultName: 'iPhone 6(横)',
+          ResultName: 'SP_横画面_Googleトップページ',
           Progress: '未処理',
           ResultSetId: 'Result-Set-1'
         },
         {
           Id: 'Result-1',
           Type: 'SCREENSHOT',
-          ResultName: 'iPhone 6(縦)',
+          ResultName: 'SP_縦画面_Yahooトップページ',
+          Progress: '未処理',
+          ResultSetId: 'Result-Set-1'
+        },
+        {
+          Id: 'Result-1',
+          Type: 'SCREENSHOT',
+          ResultName: 'PC_Basic認証テストページ',
           Progress: '未処理',
           ResultSetId: 'Result-Set-1'
         }
