@@ -199,6 +199,7 @@ Resources:
       StageName: !Ref Env
       Cors:
         AllowOrigin: "'*'"
+        AllowHeaders: "'Content-Type'"
 
   # スクリーンショット取得処理のキュー
   ScreenshotProcessSQS:
