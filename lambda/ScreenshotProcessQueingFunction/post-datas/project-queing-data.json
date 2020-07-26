@@ -3,8 +3,7 @@
     "resultSetName": "プロジェクト1",
     "actions": [
       {
-        "actionId":"Action-1",
-        "actionName":"iPhone 6(横)",
+        "actionName":"SP_横画面_Googleトップページ",
         "browserSettings": {
           "deviceType" : null,
           "userAgent" : "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1",
@@ -32,8 +31,7 @@
         ]
       },
       {
-        "actionId":"Action-2",
-        "actionName":"iPhone 6(縦)",
+        "actionName":"SP_縦画面_Yahooトップページ",
         "browserSettings": {
           "deviceType" : "iPhone 6"
         },
@@ -48,6 +46,32 @@
           {
             "processType":"WAIT",
             "millisecond": 3000
+          }
+        ]
+      },
+      {
+        "actionName":"PC_Basic認証テストページ",
+        "browserSettings": {
+          "viewport" : {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        "screenshotOptions": {
+          "fullPage": true
+        },
+        "actionProcesies": [
+          {
+            "processType":"GOTO",
+            "url": "http://leggiero.sakura.ne.jp/xxxxbasic_auth_testxxxx/secret/kaiin_page_top.htm",
+            "basicAuth": {
+              "username": "kaiin",
+              "password": "naisho"
+            }
+          },
+          {
+            "processType":"WAIT",
+            "millisecond": 500
           }
         ]
       }
