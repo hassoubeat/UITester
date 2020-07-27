@@ -4,7 +4,8 @@
     "version": "0.0.1",
     "private": true,
     "dependencies": {
-        "dynamodb-dao": "file:./dynamodb-dao"
+        "columnify": "^1.5.4",
+        "dedent-js": "^1.0.1"
     },
     "scripts": {}
 }
