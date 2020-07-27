@@ -111,6 +111,8 @@ async function browserAction(page, actionProcess) {
   const CLICK = 'CLICK'; // ページクリック
   const FOCUS = 'FOCUS'; // フォーカス
   const INPUT = 'INPUT'; // 入力
+  const SCROLL = 'SCROLL'; // スクロール
+  const AUTO_SCROLL = 'AUTO_SCROLL'; // 自動スクロール
 
   switch (actionProcess.processType) {
     case GOTO: {
@@ -141,7 +143,45 @@ async function browserAction(page, actionProcess) {
       await page.type(actionProcess.selector, actionProcess.value);
       break;
     }
+    case SCROLL: {
+      console.log('switch ' + SCROLL);
+      await scroll(page, actionProcess.distance.xPixel, actionProcess.distance.yPixel);
+      break;
+    }
+    case AUTO_SCROLL: {
+      console.log('switch ' + AUTO_SCROLL);
+      await autoScroll(page);
+      break;
+    }
     default:
       console.log('switch default');
     }
+}
+
+// puppeteerのスクロール処理
+async function scroll(page, xPixel=0, yPixel=0){
+  await page.evaluate(async (xPixel, yPixel) => {
+    window.scrollBy(xPixel, yPixel);
+  }, xPixel, yPixel);
+}
+
+// 【TODO】【beta】puppeteerの自動スクロール処理
+// 0.1秒毎に100ピクセルずつ画面下部に当たるまでスクロールする
+async function autoScroll(page){
+  await page.evaluate(async () => {
+    await new Promise((resolve, reject) => {
+      var totalHeight = 0;
+      var distance = 100;
+      var timer = setInterval(() => {
+        var scrollHeight = document.body.scrollHeight;
+        window.scrollBy(0, distance);
+        totalHeight += distance;
+
+        if(totalHeight >= scrollHeight){
+            clearInterval(timer);
+            resolve();
+        }
+      }, 100);
+    });
+  });
 }
