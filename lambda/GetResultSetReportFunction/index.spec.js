@@ -88,6 +88,22 @@ describe('GetResultSetReportFunction Success Group', () => {
           .gridjs-sort {
             border: none;
           }
+          
+          #screenshotDiffModal th.gridjs-th:first-child {
+            border: 1px solid #e5e7eb;;
+          }
+    
+          #screenshotDiffModal th.gridjs-th:last-child {
+            border: 1px solid #e5e7eb;;
+          }
+    
+          #screenshotDiffModal td.gridjs-td:first-child {
+            border: 1px solid #e5e7eb;;
+          }
+    
+          #screenshotDiffModal td.gridjs-td:last-child {
+            border: 1px solid #e5e7eb;;
+          }
         </style>
       </head>
       <body>
