@@ -6,6 +6,7 @@ Globals:
   Function:
     Timeout: 30
     Layers:
+      - !Ref UtilLayer
       - !Ref MyLibLayer
     Environment:
       Variables:
@@ -179,6 +180,15 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       ContentUri: 'lambda/layer/node-resemble-js'
+      CompatibleRuntimes:
+        - nodejs12.x
+    Metadata:
+      BuildMethod: nodejs12.x
+  # 汎用的なライブラリのレイヤー
+  UtilLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: 'lambda/layer/util'
       CompatibleRuntimes:
         - nodejs12.x
     Metadata:
