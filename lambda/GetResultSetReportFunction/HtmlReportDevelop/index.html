@@ -80,7 +80,7 @@
         sort: false,
         formatter: (diffObj) => gridjs.html(`<center><button class='btn btn-primary' onclick='showScreenshotDiff("${diffObj.origin}", "${diffObj.target}", "${diffObj.diffResult}")' >Show Detail</button></center>`)
       }],
-      data: <%- JSON.stringify(resultList) %>,
+      data: [{"ResultName":"iPhone 6(縦)","DiffMisMatchRate":"29.91","OriginS3ObjectKey":"result/Result-Set-1/iPhone 6(縦).png","ResultSetId":"Result-Set-18","TargetS3ObjectKey":"result/Result-Set-2/iPhone 6(縦).png","Id":"Result-31","Type":"SCREENSHOT_DIFF","Progress":"処理済","S3ObjectKey":"result/Result-Set-18/iPhone 6(縦).png","diffObj":{"origin":"https://dummy.s3.amazonaws.com/result/Result-Set-1/iPhone 6(縦).png","target":"https://dummy.s3.amazonaws.com/result/Result-Set-2/iPhone 6(縦).png","diffResult":"https://dummy.s3.amazonaws.com/result/Result-Set-18/iPhone 6(縦).png"}},{"ResultName":"iPhone 6(横)","DiffMisMatchRate":"0.01","OriginS3ObjectKey":"result/Result-Set-1/iPhone 6(横).png","ResultSetId":"Result-Set-18","TargetS3ObjectKey":"result/Result-Set-2/iPhone 6(横).png","Id":"Result-32","Type":"SCREENSHOT_DIFF","Progress":"処理済","S3ObjectKey":"result/Result-Set-18/iPhone 6(横).png","diffObj":{"origin":"https://dummy.s3.amazonaws.com/result/Result-Set-1/iPhone 6(横).png","target":"https://dummy.s3.amazonaws.com/result/Result-Set-2/iPhone 6(横).png","diffResult":"https://dummy.s3.amazonaws.com/result/Result-Set-18/iPhone 6(横).png"}}],
       sort: true
     }).render(document.getElementById('resultList'));;
 
