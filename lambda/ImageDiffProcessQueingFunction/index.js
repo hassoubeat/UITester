@@ -58,6 +58,9 @@ exports.lambda_handler = async (event, context) => {
     // 比較対象配列の中に同じResultNameを持つデータ(比較対象)が存在するかをチェック
     const targetResult = targetResultList.Items.find(targetResult => originResult.ResultName === targetResult.ResultName);
 
+    // 比較対象が存在しない場合はスキップ
+    if (!targetResult) continue;
+
     // DynamoDBにメタデータ登録
     const resultId = `Result-${await dynamodbDao.getResultId(dynamoDbDocumentClient, UITESTER_DYNAMODB_TABLE_NAME)}`;
 
@@ -73,30 +76,23 @@ exports.lambda_handler = async (event, context) => {
         ResultSetId: resultSetId
       }
     }
-
-    if (!targetResult) {
-      putObject.Item.Progress = 'エラー'
-      putObject.Item.ErrorMessage = '比較対象が存在しません'
-    }
     
     await dynamodbDao.put(dynamoDbDocumentClient, putObject);
 
     // SQSにデータ追加
-    if (targetResult) {
-      var diffQueingMessage = {
-        originS3ObjectKey: originResult.S3ObjectKey,
-        targetS3ObjectKey: targetResult.S3ObjectKey,
-        resultSetId: resultSetId,
-        resultId: resultId,
-        resultName: originResult.ResultName
-      }
-
-      // 比較処理用のメッセージをSQSに登録
-      await SQS.sendMessage({
-        MessageBody: JSON.stringify(diffQueingMessage),
-        QueueUrl: SQS_QUEUE_URL,
-      }).promise();
+    var diffQueingMessage = {
+      originS3ObjectKey: originResult.S3ObjectKey,
+      targetS3ObjectKey: targetResult.S3ObjectKey,
+      resultSetId: resultSetId,
+      resultId: resultId,
+      resultName: originResult.ResultName
     }
+
+    // 比較処理用のメッセージをSQSに登録
+    await SQS.sendMessage({
+      MessageBody: JSON.stringify(diffQueingMessage),
+      QueueUrl: SQS_QUEUE_URL,
+    }).promise();
 
     result.results.push(putObject.Item);
   }
