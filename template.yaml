@@ -22,6 +22,9 @@ Parameters:
       - stg
       - local
     Default: local
+  RestApiAuthToken: # RestAPIの認証用トークン(自身で設定)
+    Type: String
+    Default: hogehoge
 
 Resources:
   # ResultSetの一覧取得
@@ -165,6 +168,16 @@ Resources:
           Properties:
             Queue: !GetAtt ImageDiffProcessSQS.Arn
             BatchSize: 1
+  # RESTAPIのLambdaAuthorizer
+  RestApiAuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/RestApiAuthFunction/
+      Handler: index.lambda_handler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          AUTH_TOKEN: !Ref RestApiAuthToken
 
   # Puppeteer(chrome-aws-lambda)の関連ライブラリのレイヤー
   PuppeteerLayer:
@@ -209,7 +222,17 @@ Resources:
       StageName: !Ref Env
       Cors:
         AllowOrigin: "'*'"
-        AllowHeaders: "'Content-Type'"
+        AllowHeaders: "'*'"
+      Auth:
+        AddDefaultAuthorizerToCorsPreflight: false
+        DefaultAuthorizer: MyLambdaCustomAuthorizer
+        Authorizers:
+          MyLambdaCustomAuthorizer:
+            FunctionPayloadType: REQUEST
+            FunctionArn: !GetAtt RestApiAuthFunction.Arn
+            Identity:
+              QueryStrings:
+                - authToken
 
   # スクリーンショット取得処理のキュー
   ScreenshotProcessSQS:
@@ -312,19 +335,19 @@ Resources:
 Outputs:
   GetResultSetListFunction:
     Description: "Access Command"
-    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/"
+    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/?authToken=${RestApiAuthToken}"
   GetResultListFunction:
     Description: "Access Command"
-    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{resultSetId}/results/"
+    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{resultSetId}/results/?authToken=${RestApiAuthToken}"
   GetResultSetReportFunction:
     Description: "Access Command"
-    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{resultSetId}/report/{reportType = (html)}"
+    Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{resultSetId}/report/{reportType = (html)}/?authToken=${RestApiAuthToken}"
   ScreenshotProcessQueingFunction:
     Description: "Access Command"
-    Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/screenshot-queing"
+    Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/screenshot-queing/?authToken=${RestApiAuthToken}"
   ImageDiffProcessQueingApi:
     Description: "Access Command"
-    Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/imagediff-queing"
+    Value: !Sub "curl -X POST -d {} https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/imagediff-queing/?authToken=${RestApiAuthToken}"
   ScreenshotProcessSQS:
     Description: "ScreenshotProcessSQS PATH"
     Value: !Sub "${ScreenshotProcessSQS}"

@@ -138,6 +138,7 @@
       // UITesterのREST APIのドメイン
       const REST_API_DOMAIN = "https://xxx";
       const ENV = "xxx";
+      const AUTH_TOKEN = "xxx";
 
       var resultSetListTable = new gridjs.Grid({
         columns: [],
@@ -169,18 +170,18 @@
 
       // ResultSet一覧取得
       async function getResultSetList() {
-        const response = await axios.get(`${REST_API_DOMAIN}/${ENV}/result-sets/`);
+        const response = await axios.get(`${REST_API_DOMAIN}/${ENV}/result-sets?authToken=${AUTH_TOKEN}`);
         return response.data.message;
       }
 
       // ScreenshotQueing処理
       async function postScreenshotQueing(postData) {
-        const response = await axios.post(`${REST_API_DOMAIN}/${ENV}/result-sets/screenshot-queing`, postData);
+        const response = await axios.post(`${REST_API_DOMAIN}/${ENV}/result-sets/screenshot-queing?authToken=${AUTH_TOKEN}`, postData);
       }
 
       // ImageDiffQueing処理
       async function postImageDiffQueing(postData) {
-        const response = await axios.post(`${REST_API_DOMAIN}/${ENV}/result-sets/imagediff-queing`, postData);
+        const response = await axios.post(`${REST_API_DOMAIN}/${ENV}/result-sets/imagediff-queing?authToken=${AUTH_TOKEN}`, postData);
       }
 
       // ResultSetテーブル表示
@@ -197,7 +198,7 @@
               id: 'Id', 
               name: 'Report',
               sort: false,
-              formatter: (resultSetId) => gridjs.html(`<a href="${REST_API_DOMAIN}/${ENV}/result-sets/${resultSetId}/report/html" target="_blank">View Report</a>`)
+              formatter: (resultSetId) => gridjs.html(`<a href="${REST_API_DOMAIN}/${ENV}/result-sets/${resultSetId}/report/html?authToken=${AUTH_TOKEN}" target="_blank">View Report</a>`)
             }
           ],
           data: resultSetList,
