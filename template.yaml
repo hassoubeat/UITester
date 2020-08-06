@@ -44,6 +44,25 @@ Resources:
             RestApiId: !Ref UITesterApi
             Path: /result-sets
             Method: get
+  # ResultSetの削除
+  DeleteResultSetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/DeleteResultSetFunction/
+      Handler: index.lambda_handler
+      Runtime: nodejs12.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UITesterDynamoDB
+        - S3CrudPolicy:
+            BucketName: !Ref UITesterS3
+      Events:
+        RestPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UITesterApi
+            Path: /result-sets/{resultSetId}
+            Method: delete
   # Resultの一覧取得
   GetResultListFunction:
     Type: AWS::Serverless::Function
@@ -336,6 +355,9 @@ Outputs:
   GetResultSetListFunction:
     Description: "Access Command"
     Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/?authToken=${RestApiAuthToken}"
+  DeleteResultSetFunction:
+    Description: "Access Command"
+    Value: !Sub "curl -X DELETE https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{resultSetId}/?authToken=${RestApiAuthToken}"
   GetResultListFunction:
     Description: "Access Command"
     Value: !Sub "curl https://${UITesterApi}.execute-api.${AWS::Region}.amazonaws.com/${Env}/result-sets/{resultSetId}/results/?authToken=${RestApiAuthToken}"
