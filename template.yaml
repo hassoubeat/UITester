@@ -142,6 +142,22 @@ Resources:
           Properties:
             Queue: !GetAtt ScreenshotProcessSQS.Arn
             BatchSize: 1
+  # スクリーンショットSQSのDLQ処理
+  ScreenshotProcessDLQFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/ScreenshotProcessDLQFunction/
+      Handler: index.lambda_handler
+      Runtime: nodejs12.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UITesterDynamoDB
+      Events:
+        SQSQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ScreenshotProcessDLQ.Arn
+            BatchSize: 1
   # 画像差分取得処理のキューイング処理
   ImageDiffProcessQueingFunction:
     Type: AWS::Serverless::Function
