@@ -28,7 +28,13 @@ exports.lambda_handler = async (event, context) => {
 
   result.results = [];
 
-  for(const action of payload.resultSet.actions) {
+  
+  // Actionsをイテレータが扱えるMapに変換
+  const actions = Object.entries(payload.resultSet.actions)
+
+  for(const [actionName, action] of actions) {
+    // actionNameをセット
+    action.actionName = actionName;
     try {
       const resultId = `Result-${await dynamodbDao.getResultId(dynamoDB, UITESTER_DYNAMODB_TABLE_NAME)}`;
       // DynamoDBにメタデータ(Result)の登録
