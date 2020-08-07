@@ -50,3 +50,17 @@ docker-compose up -d
 `localhost:8200`にアクセスすることでWebコンソールにアクセスが行えます。
 
 ![Web Console](https://raw.githubusercontent.com/hassoubeat/UITester/add_readme/readme%20materials/web%20console.png)
+
+## UnitTest
+一部処理はユニットテストを実装しています。
+
+```
+# jestなどモジュールのインストール
+npm install
+
+# localstackの起動
+docker-compose up -d
+
+# テストの実行
+npx jest
+```
