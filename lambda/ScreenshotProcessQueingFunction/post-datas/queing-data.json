@@ -1,9 +1,8 @@
 {
   "resultSet": {
     "resultSetName": "プロジェクト1",
-    "actions": [
-      {
-        "actionName":"SP_横画面_Googleトップページ",
+    "actions": {
+      "SP_横画面_Googleトップページ": {
         "browserSettings": {
           "deviceType" : null,
           "userAgent" : "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1",
@@ -30,8 +29,7 @@
           }
         ]
       },
-      {
-        "actionName":"SP_縦画面_Yahooトップページ",
+      "SP_縦画面_Yahooトップページ": {
         "browserSettings": {
           "deviceType" : "iPhone 6"
         },
@@ -49,8 +47,7 @@
           }
         ]
       },
-      {
-        "actionName":"PC_Basic認証テストページ",
+      "PC_Basic認証テストページ": {
         "browserSettings": {
           "viewport" : {
             "width": 1280,
@@ -75,6 +72,6 @@
           }
         ]
       }
-    ]
+    }
   }
 }

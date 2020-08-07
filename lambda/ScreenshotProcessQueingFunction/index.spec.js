@@ -37,7 +37,7 @@ describe('ScreenshotProcessQueingFunction Success Group', () => {
     console.log("app.js test");
 
     // POSTデータの読み込み
-    const inputData = require('./post-datas/project-queing-data.json');
+    const inputData = require('./post-datas/queing-data.json');
     const event = {body: JSON.stringify(inputData)};
     const response = await screenshotProcessQueing.lambda_handler(event, {});
     expect(JSON.parse(response.body).message).toEqual({
