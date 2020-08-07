@@ -80,8 +80,6 @@ exports.lambda_handler = async (event, context) => {
         }
       }
     );
-
-    return context.fail(error);
   } finally {
     if (browser !== null) {
       await browser.close();
