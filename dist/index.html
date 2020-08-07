@@ -184,6 +184,31 @@
         const response = await axios.post(`${REST_API_DOMAIN}/${ENV}/result-sets/imagediff-queing?authToken=${AUTH_TOKEN}`, postData);
       }
 
+      // ResultSet削除処理
+      async function deleteResultSet(resultSetId) {
+
+        // 削除確認 Noなら即return
+        if(!confirm(`Are you sure you want to delete the ${resultSetId}`)) return;
+
+        let toastMessage = {
+          text : "The deletion process has been accepted.",
+          bgColor : '#228B22',
+          position : 'bottom-right',
+          hideAfter : 5000
+        }
+        $.toast(toastMessage);
+        try {
+          await axios.delete(`${REST_API_DOMAIN}/${ENV}/result-sets/${resultSetId}/?authToken=${AUTH_TOKEN}`);
+          await updateResultSetList();
+          toastMessage.text = 'Successfully deleted.';
+        } catch (error) {
+          console.error(error.message);
+          toastMessage.text = 'Failed Delete request.';
+          toastMessage.bgColor = 'red';
+        }
+        $.toast(toastMessage);
+      }
+
       // ResultSetテーブル表示
       function showResultSetListTable(resultSetList) {
         resultSetListTable.updateConfig({
@@ -196,9 +221,12 @@
             { id: 'CreateDate',  name: 'CreateDate' },
             {
               id: 'Id', 
-              name: 'Report',
+              name: 'Action',
               sort: false,
-              formatter: (resultSetId) => gridjs.html(`<a href="${REST_API_DOMAIN}/${ENV}/result-sets/${resultSetId}/report/html?authToken=${AUTH_TOKEN}" target="_blank">View Report</a>`)
+              formatter: (resultSetId) => gridjs.html(`
+                <a href="${REST_API_DOMAIN}/${ENV}/result-sets/${resultSetId}/report/html?authToken=${AUTH_TOKEN}" target="_blank"><i class="fas fa-sticky-note"></i>  Report</a><br/>
+                <a href="javascript:deleteResultSet('${resultSetId}')"><i class="fas fa-trash"></i> Delete</a>
+              `)
             }
           ],
           data: resultSetList,

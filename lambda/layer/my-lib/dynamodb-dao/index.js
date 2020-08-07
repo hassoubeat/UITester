@@ -25,6 +25,11 @@ module.exports.query = async (dynamoDB, queryObj) => {
 module.exports.scan = async (dynamoDB, scanObj) => {
   return await dynamoDB.scan(scanObj).promise();
 }
+
+// データ削除
+module.exports.delete = async (dynamoDB, deleteObj) => {
+  return await dynamoDB.delete(deleteObj).promise();
+}
   
 // ResultSet用の現在のアトミックカウンターからインクリメントした値を取得
 module.exports.getResultSetId = async (dynamoDB, tableName) => {

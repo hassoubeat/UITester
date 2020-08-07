@@ -149,6 +149,34 @@ describe('DynamoDB Dao Success Group', () => {
     );
   });
 
+  // データ検索(delete)のテスト
+  test('dynamoDao delete test', async () => {
+    console.log('dynamoDao delete test');
+
+    // 削除テスト用データの登録
+    const deleteTestObj = {
+      TableName: uitesterTableName,
+      Item: {  Id: "delete-test-obj" }
+    }
+    await dynamoDbDocumentClient.put(deleteTestObj).promise();
+
+    // 削除するデータがあることを確認
+    expect(await getColumn(deleteTestObj.Item.Id)).toEqual({
+      "Item": { "Id": "delete-test-obj" }
+    });
+
+    // 登録したデータを削除
+    await dynamoDao.delete(
+      dynamoDbDocumentClient,
+      {
+        TableName: uitesterTableName,
+        Key: {　"Id": deleteTestObj.Item.Id　}
+      }
+    );
+    // 削除後のデータがないことを確認
+    expect(await getColumn(deleteTestObj.Item.Id)).toEqual({});
+  });
+
   // ResultSetId(アトミックカウンター)取得処理のテスト
   test('dynamoDao getResultSetId test', async () => {
     console.log("dynamoDao getResultSetId test");
