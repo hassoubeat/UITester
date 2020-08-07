@@ -285,65 +285,56 @@
       // スクリーンショットキューイングのPOSTイベントの設定
       function screenshotQueingDataPostEventSetup() {
         $('#screenshotQueingDataPostBtn').on('click', async function (event) {
-          let resultMessage = {};
+          let toastMessage = {
+              text : "Accepted processing.",
+              bgColor : '#228B22',
+              position : 'bottom-right',
+              hideAfter: 5000
+          };
+          $.toast(toastMessage);
           try {
             const screenshotQueingEventName = $('#screenshotQueingEventName').val();
-
             // イベント名が入力されていた場合は上書き
             if (screenshotQueingEventName) {
               screenshotQueingInputData.resultSet.resultSetName = screenshotQueingEventName;
             }
-
             await postScreenshotQueing(screenshotQueingInputData);
-
             await updateResultSetList();
-
-            resultMessage = {
-              text : "Success POST request.",
-              bgColor : '#228B22',
-              position : 'bottom-right'
-            }
+            toastMessage.text = 'Queuing processing is complete.';
           } catch (error) {
             console.error(error.message);
-            resultMessage = {
-              text : "Failed POST request.",
-              bgColor : 'red',
-              position : 'bottom-right'
-            }
+            toastMessage.text　= "Failed POST request.";
+            toastMessage.bgColor　= "red";
           }
-          $.toast(resultMessage);
+          $.toast(toastMessage);
         });
       }
 
       // 画像差分キューイングのPOSTイベントの設定
       function imageDiffQueingDataPostEventSetup() {
         $('#imageDiffQueingDataPostBtn').on('click', async function (event) {
-          let resultMessage = {};
+          let toastMessage = {
+              text : "Accepted processing.",
+              bgColor : '#228B22',
+              position : 'bottom-right',
+              hideAfter: 5000
+          };
+          $.toast(toastMessage);
           try {
-            postData = {};
-
+            const postData = {};
             postData.resultSetName = $("#imageDiffQueingEventName").val();
             postData.originResultSetId = $("#imageDiffQueingOriginResultSetId").val();
             postData.targetResultSetId = $("#imageDiffQueingTargetResultSetId").val();
 
             await postImageDiffQueing(postData);
-
             await updateResultSetList();
-
-            resultMessage = {
-              text : "Success POST request.",
-              bgColor : '#228B22',
-              position : 'bottom-right'
-            }
+            toastMessage.text = 'Queuing processing is complete.';
           } catch (error) {
             console.error(error.message);
-            resultMessage = {
-              text : "Failed POST request.",
-              bgColor : 'red',
-              position : 'bottom-right'
-            }
+            toastMessage.text　= "Failed POST request.";
+            toastMessage.bgColor　= "red";
           }
-          $.toast(resultMessage);
+          $.toast(toastMessage);
         });
       }
 
