@@ -88,3 +88,20 @@ describe('imageDiffProcessQueingFunctionFunction Success Group', () => {
   //   console.log("afterAll");
   // });
 });
+
+describe('imageDiffProcessQueingFunctionFunction Error Group', () => {
+  test('index.js exception test', async () => {
+    // POSTデータの読み込み
+    const event = {body: JSON.stringify()};
+    const response = await imageDiffProcessQueingFunction.lambda_handler(event, {});
+    expect(response).toEqual({
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, POST'
+      },
+      body: `{"message":"Unexpected token u in JSON at position 0"}`
+    });
+  });
+});
