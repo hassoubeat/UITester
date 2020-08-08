@@ -65,7 +65,7 @@ exports.lambda_handler = async (event, context) => {
     
   } catch (error) {
     // エラー発生時、DynamoDBのステータス更新
-    console.error(error.message);
+    console.error(error);
 
     // 保存後にDynamoDBのステータス更新
     await dynamodbDao.update(
