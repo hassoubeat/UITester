@@ -74,3 +74,20 @@ describe('ScreenshotProcessQueingFunction Success Group', () => {
   //   console.log("afterAll");
   // });
 });
+
+describe('ScreenshotProcessQueingFunction Error Group', () => {
+  test('index.js exception test', async () => {
+    // POSTデータの読み込み
+    const event = {body: JSON.stringify({"test":"test"})};
+    const response = await screenshotProcessQueing.lambda_handler(event, {});
+    expect(response).toEqual({
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, POST'
+      },
+      body: `{"message":"Cannot read property 'resultSetName' of undefined"}`
+    });
+  });
+});

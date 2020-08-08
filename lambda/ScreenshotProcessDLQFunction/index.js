@@ -23,6 +23,6 @@ exports.lambda_handler = async (event, context) => {
       }
     );
   } catch(error) {
-    console.error(error.message);
+    console.error(error);
   }
 }

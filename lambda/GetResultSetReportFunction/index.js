@@ -2,12 +2,21 @@ const AWS = require('aws-sdk');
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const dynamodbDao = require('dynamodb-dao');
 
-const dedent = require('dedent-js');
 const columnify = require('columnify');
 const ejs = require('ejs');
 
 const UITESTER_S3_BUCKET_NAME = process.env.UITESTER_S3_BUCKET_NAME;
 const UITESTER_DYNAMODB_TABLE_NAME = process.env.UITESTER_DYNAMODB_TABLE_NAME;
+
+// レスポンス変数の定義
+var response = {
+  'statusCode': 200,
+  'headers': {
+    "Access-Control-Allow-Headers" : "*",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "OPTIONS, GET"
+  }
+}
 
 exports.lambda_handler = async (event, context) => {
   try {
@@ -46,25 +55,18 @@ exports.lambda_handler = async (event, context) => {
         throw new Error('Please specify the correct report type');
     }
 
-    let response = {
-      'statusCode': 200,
-      'headers': {
-        "content-type" : reportObj.contentType,
-        "Access-Control-Allow-Headers" : "Content-Type",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "OPTIONS, GET"
-      },
-      'body': reportObj.report
-    }
-    return response
-
+    response.headers['content-type'] = reportObj.contentType;
+    response.body = reportObj.report;
+    
   } catch (error) {
     console.error(error);
-    let response = {
-      'statusCode': 500,
-      'body': error.message
-    }
-    return response
+
+    response.statusCode = 500;
+    response.body = JSON.stringify({
+      message: error.message
+    });
+  } finally {
+    return response;
   }
 }
 

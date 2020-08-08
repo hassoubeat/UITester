@@ -59,3 +59,19 @@ describe('GetResultListFunction Success Group', () => {
   //   console.log("afterAll");
   // });
 });
+
+describe('GetResultListFunction Error Group', () => {
+  // 例外発生のユニットテスト
+  test('index.js exception test', async () => {
+    const response = await getResultListFunction.lambda_handler({});
+    expect(response).toEqual({
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET'
+      },
+      body: `{"message":"Cannot read property 'resultSetId' of undefined"}`
+    });
+  });
+});

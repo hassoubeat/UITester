@@ -61,3 +61,38 @@ describe('GetResultSetListFunction Success Group', () => {
   //   console.log("afterAll");
   // });
 });
+
+describe('GetResultSetListFunction Error Group', () => {
+
+  beforeEach( async () => {
+    // モック処理のリセット
+    dynamoDbDao.scan = async (dynamoDB, scanObj) => {
+      return {
+        Items: [],
+        Count: 0,
+        ScannedCount: 0
+      };
+    }
+  });
+
+  // 例外発生のユニットテスト
+  test('index.js exception test', async () => {
+
+    // マニュアルモックの上書き
+    dynamoDbDao.scan = (dynamoDB, scanObj) => {
+      throw new Error("throw Exception.");
+      return;
+    }
+
+    const response = await getResultSetListFunction.lambda_handler({});
+    expect(response).toEqual({
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET'
+      },
+      body: `{"message":"throw Exception."}`
+    });
+  });
+});
