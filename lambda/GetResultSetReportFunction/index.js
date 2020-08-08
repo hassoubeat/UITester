@@ -74,7 +74,7 @@ exports.lambda_handler = async (event, context) => {
 function outputConsoleReport(resultList) {
   const sortedResultList = mapIdSort(resultList);
   return columnify(sortedResultList, {
-    columns: ['Id', 'ResultName', 'Progress', 'Type', 'DiffMisMatchRate', 'S3ObjectKey', 'OriginS3ObjectKey', 'TargetS3ObjectKey', 'ResultSetId'],
+    columns: ['Id', 'ResultName', 'Progress', 'ErrorMessage', 'Type', 'DiffMisMatchRate', 'S3ObjectKey', 'OriginS3ObjectKey', 'TargetS3ObjectKey', 'ResultSetId'],
     columnSplitter: ' | '
   });
 }
