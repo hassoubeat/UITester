@@ -14,7 +14,7 @@
     "jest": "^26.1.0"
   },
   "devDependencies": {
-    "browser-sync": "^2.26.10",
+    "browser-sync": "^2.27.10",
     "gulp": "^4.0.2"
   }
 }
